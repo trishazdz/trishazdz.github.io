@@ -1,10 +1,13 @@
 body {overflow-x: hidden;}
-
+.container {max-width:1050px;}
+.content {margin-top: 200px;}
 h1 {font-family: 'PT Sans', sans-serif; color:#203939; font-weight:700; font-size: 64px; text-transform: uppercase;}
 h2 {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 32px;}
 h3 {font-family: 'PT Sans', sans-serif; color:#F79973;}
 
 p {font-family: 'PT Serif', serif; color: #203939; font-size:16px;}
+
+a {font-family: 'PT Sans Caption', sans-serif; color:#F79973; font-size:32px;}
 
 #top-svg {height:140px; margin-bottom:10px; position: relative; right:15%;}
 #bottom-svg {height:140px; margin-bottom:0; position: relative; right:15%;}
@@ -12,23 +15,37 @@ p {font-family: 'PT Serif', serif; color: #203939; font-size:16px;}
 @media (max-width: 767px) {
 	h1 {font-size: 48px;}
 	h2 {font-size: 28px;}
+	a {font-size:28px;}
 }
 @media (min-width: 768px)  {
-	#top-svg {height:320px; margin-bottom:30px; position: relative; right:35%;}	
-	#bottom-svg {height:320px; margin-bottom:0; position: relative; right:35%;}
+	#top-svg {height:220px; margin-bottom:30px; position: relative; right:50%; position:relative;}	
+	#bottom-svg {height:220px; margin-bottom:0; position: relative; right:42%;}
 }
 
 @media (min-width: 992px) {
+	#top-svg {height:320px; margin-bottom:30px; position: relative; right:50%; position:relative;}	
+	#bottom-svg {height:320px; margin-bottom:0; position: relative; right:42%;}
 }
+
 
 #project-title {margin-bottom:0; margin-top:0;}
 #project-description {margin-top: 0;}
 #project-description-more {margin-left:0; margin-right:0; padding-left:0; padding-right:0;}
+#data-links {margin-top:100px;}
+#data-links div{padding-left:0;}
 
 .logistics * {margin-top:0; margin-bottom:0;}
 .logistics h1 {font-family:'PT Sans Caption', sans-serif; color: #203939; margin-top: 10px;
 				font-size:26px; font-weight:400; text-transform: Capitalize;}
 .logistics h2 {font-family: 'PT Sans Narrow', sans-serif; font-weight:700; color: #203939; font-size: 48px;}
-.logistics span {font-family: 'PT Sans Narrow', sans-serif; font-size: 16px;}
+.logistics span {font-family: 'PT Sans', sans-serif; font-size: 16px;}
 
 
+
+
+div.content p {margin-bottom: 20px;}
+
+.citations p {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 12px; 
+				}
+
+#about-me a {font-size:14px;}
