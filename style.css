@@ -34,7 +34,7 @@ a:hover {text-decoration: none;}
 #project-description {margin-top: 0;}
 #project-description-more {margin-left:0; margin-right:0; padding-left:0; padding-right:0;}
 #data-links {margin-top:120px;}
-#data-links a {font-size:32px;}
+#data-links a {font-size:32px; font-family: 'PT Sans', sans-serif;}
 #data-links div{padding-left:0;}
 
 .logistics * {margin-top:0; margin-bottom:0;}
