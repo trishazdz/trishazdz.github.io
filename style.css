@@ -1,5 +1,6 @@
 body {overflow-x: hidden;}
 .container {max-width:1050px;}
+.row {margin-left:0; margin-right:0;}
 .content {margin-top: 200px;}
 h1 {font-family: 'PT Sans', sans-serif; color:#203939; font-weight:700; font-size: 64px; text-transform: uppercase;}
 h2 {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 32px;}
@@ -31,14 +32,16 @@ a {font-family: 'PT Sans Caption', sans-serif; color:#F79973; font-size:32px;}
 #project-title {margin-bottom:0; margin-top:0;}
 #project-description {margin-top: 0;}
 #project-description-more {margin-left:0; margin-right:0; padding-left:0; padding-right:0;}
-#data-links {margin-top:100px;}
+#data-links {margin-top:120px;}
 #data-links div{padding-left:0;}
 
 .logistics * {margin-top:0; margin-bottom:0;}
 .logistics h1 {font-family:'PT Sans Caption', sans-serif; color: #203939; margin-top: 10px;
 				font-size:26px; font-weight:400; text-transform: Capitalize;}
 .logistics h2 {font-family: 'PT Sans Narrow', sans-serif; font-weight:700; color: #203939; font-size: 48px;}
-.logistics span {font-family: 'PT Sans', sans-serif; font-size: 16px;}
+.logistics p {font-family: 'PT Sans', sans-serif; margin-bottom:5px;}
+.logistics span {font-family: 'PT Sans Caption', sans-serif; font-size: 12px; margin-bottom:5px;}
+.logistics iframe {margin-top: 10px;}
 
 
 
