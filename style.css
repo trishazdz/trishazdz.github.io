@@ -53,3 +53,18 @@ div.content p {margin-bottom: 20px;}
 				}
 
 #about-me a {font-size:14px;}
+
+
+
+/* LANDIN PAGE STYLING */
+
+#ellie {font-family: 'PT Serif', serif; font-weight:400; color:#203939; text-align: center;
+			font-size:40px; text-transform: capitalize;}
+
+#landing-page a {font-size: 30px; color: #203939;}
+#landing-page p {text-align: center;}
+#landing-page section {margin-top:50px;}
+
+@media (max-width: 767px) {
+	#landing-page a {font-size: 20px;}
+}
