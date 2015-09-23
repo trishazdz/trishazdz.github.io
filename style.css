@@ -17,6 +17,8 @@ a:hover {text-decoration: none;}
 @media (max-width: 767px) {
 	.logistics {margin-top: 25px; margin-bottom:25px;}
 	.content {margin-top:25px;}
+
+	img {width:100%;}
 }
 @media (max-width: 991px) {
 	h1 {font-size: 42px;}
@@ -25,6 +27,8 @@ a:hover {text-decoration: none;}
 @media (min-width: 768px)  {
 	#top-svg {height:220px; margin-bottom:30px; position: relative; right:50%; position:relative;}	
 	#bottom-svg {height:220px; margin-bottom:0; position: relative; right:42%;}
+
+	img {width: 70%;}
 }
 
 @media (min-width: 992px) {
@@ -62,8 +66,8 @@ div.content p {margin-bottom: 20px;}
 
 .caption {font-size: 12px;}
 
-.citations p {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 12px; 
-				}
+div.content .citations p {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 12px; 
+				margin-bottom: 5px;}
 
 .social a {display: inline; margin-right:10px;}
 .social img {width:50px;}
