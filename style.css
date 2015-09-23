@@ -1,4 +1,4 @@
-body {overflow-x: hidden;}
+body {max-width:100%; overflow-x: hidden;}
 .container {max-width:1050px;}
 .row {margin-left:0; margin-right:0;}
 .content {margin-top: 200px;}
@@ -11,8 +11,8 @@ p {font-family: 'PT Serif', serif; color: #203939; font-size:16px;}
 a {color:#F79973;}
 a:hover {text-decoration: none;}
 
-#top-svg {height:140px; margin-bottom:10px; position: relative; right:15%; overflow-x: hidden;}
-#bottom-svg {height:140px; margin-bottom:0; position: relative; right:15%; overflow-x: hidden;}
+#top-svg {height:140px; margin-bottom:10px; position: relative; right:15%;}
+#bottom-svg {height:140px; margin-bottom:0; position: relative; right:15%;}
 
 @media (max-width: 767px) {
 	.logistics {margin-top: 25px; margin-bottom:25px;}
