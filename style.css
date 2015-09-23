@@ -1,4 +1,5 @@
 body {overflow-x: hidden;}
+body * {overflow-x: hidden;}
 embed, svg {overflow: hidden;}
 .container {max-width:1050px;}
 .row {margin-left:0; margin-right:0;}
