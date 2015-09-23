@@ -65,6 +65,7 @@ div.content p {margin-bottom: 20px;}
 			font-size:40px; text-transform: capitalize;}
 
 #landing-page a {font-size: 30px; color: #203939;}
+#landing-page a:hover {color:#F79973;}
 #landing-page p {text-align: center;}
 #landing-page section {margin-top:50px;}
 
