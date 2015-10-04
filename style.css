@@ -64,7 +64,8 @@ header h2 {color: #203939;}
 
 div.content p {margin-bottom: 20px;}
 
-.caption {font-size: 12px;}
+
+.caption {font-size: 12px; font-family: 'PT Sans Caption', sans-serif;}
 
 div.content .citations p {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 12px; 
 				margin-bottom: 5px;}
