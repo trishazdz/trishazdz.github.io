@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+	<script src="http://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
+	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js'></script>
+</head>
+<body>
+	<style>
+		.axis path, .axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+	</style>
+	
+	<form data-bind="submit: fetchSession">
+		<input data-bind="textInput: sessionId" placeholder="session id" />
+		<button type="submit">Find Data</button>
+	</form>
+	<p data-bind="text: session().ID"></p>
+
+	<script>
+	/*var dataset = {
+			1018: {"ID":"1018", "seed":"0","SourceID":"1011","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":2,"taps":[134.94,291.34,335.6,272.87,266.68,283.77,266.45,266.29,259.3,257.48,259.3], "age":"17","Gender":"3","zip":"","musical":"","comments":"NA "},
+			1020: {"ID":"1020", "seed":"0","SourceID":"1018","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":3,"taps":[134.94,300.34,200.6,472.87,232.68,183.37,300.45,260.29,102.3,200.48,300.3], "age":"20","Gender":"1","zip":"","musical":"","comments":"NA "},
+			1021: {"ID":"1021", "seed":"0","SourceID":"1011","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":4,"taps":[134.94,291.34,310.6,103.87,999.68,283.77,312.45,266.29,232.3,257.48,259.3], "age":"35","Gender":"2","zip":"","musical":"","comments":"NA "}
+		};
+	*/
+
+		var data;
+
+		d3.json('2015-10-02.json', function(json) {
+			data = json;
+		});
+
+
+		var w = 500, h = 500, padding = 20;
+
+		var xScale = d3.scale.linear()
+						.domain([0, 1000])
+						.range([0, w]);
+
+		var yScale = d3.scale.linear()
+		    		.domain([0,20])
+		    		.range([padding, h - padding]);
+
+		var Viewmodel = {
+			sessionId: ko.observable(),
+			session: ko.observable({ID: undefined}),
+
+			svg: undefined,
+
+			initSvg: function() {
+				var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("top")
+					.ticks(5);
+
+				this.svg = d3.select("body")
+		        	.append("svg")
+		        	.attr("width", w)
+		        	.attr("height", h);
+
+				this.svg.append("g")
+			        	.attr("class", "axis")
+			        	.attr("transform", "translate(10, 20)")	
+			        	.call(xAxis);
+			},
+
+			fetchSession: function() {
+				var id = this.sessionId();
+				var dataElement = this.getDataElementById(id);
+				console.log(dataElement);
+
+				this.session(new Session( dataElement ));
+
+				console.log(this.session());
+
+				this.plotSession();
+			},
+
+			getDataElementById: function(id) {
+				var index = data.map(function(element) {
+					if (element["ID"]) {
+						return element["ID"][0]
+					}
+				}).indexOf(id);
+				
+				return data[index];
+			},
+
+			plotSession: function() {
+				var session = this.session();
+
+				var circle = this.svg.selectAll("circle")
+		        	.data(session.taps);
+
+		        circle
+					.enter()
+		        	.append("circle")
+		        	.attr("r", function(d) {
+		        		return 7;
+		        	});
+
+		        circle
+		        	.attr("cx", function(d) {
+		        		return xScale(d);
+		       		})
+		        	.attr("cy", function(d, i) {
+		        		return yScale(i);
+		        	});
+			}
+		};
+		ko.applyBindings(Viewmodel);
+
+		Viewmodel.initSvg();
+
+		
+
+		function Session(params) {
+			this.ID = params.ID;
+			this.taps = params.Tapping;
+		}
+
+		Session.prototype.getAverage = function() {
+			var sum = 0;
+
+			for (var i = 0; i < this.taps.length; i++) {
+				sum += Number(this.taps[i]);
+			}
+
+			return sum / this.taps.length;
+		}
+
+	    
+
+	</script>
+</body>
+</html>
