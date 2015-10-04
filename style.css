@@ -73,12 +73,12 @@ div.content .citations p {font-family: 'PT Sans Caption', sans-serif; color: #20
 .social img {width:50px;}
 
 @media (max-width: 767px) {
-	#about-me div {margin-bottom: 25px;}
+	#about-me section {margin-bottom: 25px;}
 }
 
 @media (min-width: 768px) {
 
-	#about-me div {margin-bottom: 50px;}
+	#about-me section {margin-bottom: 50px;}
 }
 
 /* LANDIN PAGE STYLING */
