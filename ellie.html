@@ -22,22 +22,13 @@
 		<input data-bind="textInput: sessionId" placeholder="session id" />
 		<button type="submit">Find Data</button>
 	</form>
-	<p data-bind="text: session().ID"></p>
+	<p>
+		<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
+	</p>
+	<p data-bind="text: activeId"></p>
 
 	<script>
-	/*var dataset = {
-			1018: {"ID":"1018", "seed":"0","SourceID":"1011","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":2,"taps":[134.94,291.34,335.6,272.87,266.68,283.77,266.45,266.29,259.3,257.48,259.3], "age":"17","Gender":"3","zip":"","musical":"","comments":"NA "},
-			1020: {"ID":"1020", "seed":"0","SourceID":"1018","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":3,"taps":[134.94,300.34,200.6,472.87,232.68,183.37,300.45,260.29,102.3,200.48,300.3], "age":"20","Gender":"1","zip":"","musical":"","comments":"NA "},
-			1021: {"ID":"1021", "seed":"0","SourceID":"1011","Mode":"a","Type":"t","Chain":"2","ChainID":"1011-0at", "length":4,"taps":[134.94,291.34,310.6,103.87,999.68,283.77,312.45,266.29,232.3,257.48,259.3], "age":"35","Gender":"2","zip":"","musical":"","comments":"NA "}
-		};
-	*/
-
 		var data;
-
-		d3.json('2015-10-02.json', function(json) {
-			data = json;
-		});
-
 
 		var w = 500, h = 500, padding = 20;
 
@@ -51,7 +42,11 @@
 
 		var Viewmodel = {
 			sessionId: ko.observable(),
-			session: ko.observable({ID: undefined}),
+			session: ko.observable(),
+			activeId: ko.observable(),
+
+			error: ko.observable(undefined),
+			errorId: ko.observable(undefined),
 
 			svg: undefined,
 
@@ -63,6 +58,7 @@
 
 				this.svg = d3.select("body")
 		        	.append("svg")
+		        	.attr("id", "dv")
 		        	.attr("width", w)
 		        	.attr("height", h);
 
@@ -75,23 +71,26 @@
 			fetchSession: function() {
 				var id = this.sessionId();
 				var dataElement = this.getDataElementById(id);
-				console.log(dataElement);
 
-				this.session(new Session( dataElement ));
+				if (dataElement) {
+					this.error("");
+					this.errorId("");
+					this.activeId(id);
+					this.session(new Session( dataElement ));
+					this.plotSession();
+				} else {
+					this.activeId("");
+					this.errorId(id);
+					this.error(" doesn't exist. Please double check that you have entered the correct ID.");
+				}
 
-				console.log(this.session());
-
-				this.plotSession();
 			},
 
 			getDataElementById: function(id) {
-				var index = data.map(function(element) {
-					if (element["ID"]) {
-						return element["ID"][0]
-					}
-				}).indexOf(id);
-				
-				return data[index];
+				var element = data[id];
+
+				if (element) { return element; } 
+				else { return false; }
 			},
 
 			plotSession: function() {
@@ -114,12 +113,12 @@
 		        	.attr("cy", function(d, i) {
 		        		return yScale(i);
 		        	});
+
+		        circle
+		        	.exit()
+		        		.remove();
 			}
 		};
-		ko.applyBindings(Viewmodel);
-
-		Viewmodel.initSvg();
-
 		
 
 		function Session(params) {
@@ -138,7 +137,13 @@
 		}
 
 	    
+		d3.json('2015-10-03.json', function(json) {
+			data = json;
 
+			ko.applyBindings(Viewmodel);
+
+			Viewmodel.initSvg();
+		});
 	</script>
 </body>
 </html>
