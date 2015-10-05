@@ -18,8 +18,30 @@
 		}
 
 		.data-point {
-			fill: #f79973;
+			fill: black;
 		}
+
+		.source-point {
+			fill: none;
+		}
+
+		.seed-line {
+			stroke: black;
+			stroke-width: 2;
+		}
+
+		.error-margin {
+			stroke-width: 13;
+		}
+
+		.faster {
+			stroke: red;
+		}
+
+		.slower {
+			stroke: yellow;
+		}
+		.warning {color:red;}
 
 
 	</style>
@@ -28,10 +50,18 @@
 		<input data-bind="textInput: sessionId" placeholder="Participant ID" />
 		<button type="submit">Find Data</button>
 	</form>
-	<p>
+	<p class="warning">
 		<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
 	</p>
 	<p data-bind="text: activeId"></p>
+
+	<div data-bind="if: session">
+		<p>You heard 
+			<a href="" data-bind="click: fetchSource" >
+				<span data-bind="text: session().SourceID"></span>
+			</a>'s version
+		</p>
+	</div>
 
 	<script>
 		var data, stimuli;
@@ -43,8 +73,8 @@
 		    		.range([padding * 2, h - padding]);
 
 		var Viewmodel = {
-			sessionId: ko.observable(),
-			session: ko.observable(),
+			sessionId: ko.observable(1306),
+			session: ko.observable(undefined),
 			activeId: ko.observable(),
 
 			error: ko.observable(undefined),
@@ -73,6 +103,14 @@
 			        	.attr("id", "x-axis")
 			        	.attr("transform", "translate(10, 20)")	
 			        	.call(xAxis);
+
+			    this.fetchSession();
+			},
+
+			fetchSource: function() {
+				var sourceId = this.session().SourceID;
+				this.sessionId(sourceId);
+				this.fetchSession();
 			},
 
 			fetchSession: function() {
@@ -85,6 +123,7 @@
 					this.activeId(id);
 					this.session(new Session( dataElement ));
 					this.plotSession();
+					this.fetchChain(this.session().ChainID);
 				} else {
 					this.activeId("");
 					this.errorId(id);
@@ -93,11 +132,29 @@
 
 			},
 
-			getDataElementById: function(id) {
-				var element = data[id];
+			fetchChain: function(chainId) {
+				var chain = [];
+				for (var key in data) {
+					if (data[key].ChainID == chainId) {
+						chain.push(key);
+					}
+				};
 
-				if (element) { return element; } 
-				else { return false; }
+				return chain;
+			},
+
+			getDataElementById: function(id) {
+				if (id >= 1000) {
+					var element = data[id];
+
+					if (element) { return element; } 
+					else { return false; }
+				} else {
+					// fetch seed stimuli
+
+					this.getStimuli()
+				}
+				
 			},
 
 			getStimuli: function(seed, type) {
@@ -121,34 +178,168 @@
 				var session = this.session();
 				var sessionStimuli = this.getStimuli(session.Seed, session.Type);
 
+				if (session.SourceID >= 1000) {
+					var sessionSource = new Session( this.getDataElementById(session.SourceID) );
+				} else {
+					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
+				}
+
 				var xScale = d3.scale.linear()
 		        	.domain([d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500, 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;})])
 		        	.range([padding, w - padding * 2]);
 
-				var circle = this.canvas.selectAll("circle")
-		        	.data(session.Tapping);
+		        var bothData = [];
 
-		        circle
-					.enter()
-		        	.append("circle")
-		        	.attr("r", function(d) {
-		        		return 7;
-		        	})
-		        	.attr("class", "data-point");
+		        for ( var i = 0; i < sessionSource.Tapping.length; i++ ) {
+		        	bothData.push( {source: sessionSource.Tapping[i], 
+		        					session: session.Tapping[i] } );
+		        };
 
-		        circle
-		        	.attr("cx", function(d) {
-		        		return xScale(d);
-		       		})
-		        	.attr("cy", function(d, i) {
-		        		return yScale(i);
-		        	});
 
-		        circle
+		        var errorMargins = this.canvas.selectAll(".error-margin")
+		        	.data(bothData);
+
+		        errorMargins
+		        		.attr("class", function(d) {
+		        			if (d.session > d.source) {
+		        				return "error-margin slower";
+		        			} else {
+		        				return "error-margin faster";
+		        			}
+		        		})
+		        		.attr("x1", function(d) {
+		        			return xScale(d.session);
+		        		})
+		        		.attr("y1", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        		.attr("x2", function(d) {
+		        			return xScale(d.source);
+		        		})
+		        		.attr("y2", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        	.enter()
+		        		.append("line")
+		        		.attr("class", function(d) {
+		        			if (d.session > d.source) {
+		        				return "error-margin slower";
+		        			} else {
+		        				return "error-margin faster";
+		        			}
+		        		})
+		        		.attr("x1", function(d) {
+		        			return xScale(d.session);
+		        		})
+		        		.attr("y1", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        		.attr("x2", function(d) {
+		        			return xScale(d.source);
+		        		})
+		        		.attr("y2", function(d, i) {
+		        			return yScale(i);
+		        		});
+
+		        errorMargins
 		        	.exit()
 		        		.remove();
 
-		         var xAxis = d3.svg.axis()
+				var dataPoints = this.canvas.selectAll(".data-point")
+					.data(session.Tapping);
+
+				dataPoints
+			        	.attr("cx", function(d) {
+			        		return xScale(d);
+			       		})
+			        	.attr("cy", function(d, i) {
+			        		return yScale(i);
+			        	})
+					.enter()
+		        		.append("circle")
+		        		.attr("r", function(d) {
+		        			return 7;
+		        		})
+		        		.attr("cx", function(d) {
+			        		return xScale(d);
+			       		})
+			        	.attr("cy", function(d, i) {
+			        		return yScale(i);
+			        	})
+		        		.attr("class", "data-point");
+
+		        dataPoints
+		        	.exit()
+		        		.remove();
+
+		        var sourcePoints = this.canvas.selectAll(".source-point")
+		        	.data(sessionSource.Tapping);
+		        sourcePoints
+		       			.attr("cx", function(d) {
+		        			return xScale(d);
+		        		})
+		        		.attr("cy", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        	.enter()
+		        		.append("circle")
+		        		.attr("r", function(d) {
+		        			return 7;
+		        		})
+		        		.attr("cx", function(d) {
+		        			return xScale(d);
+		        		})
+		        		.attr("cy", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        		.attr("class", "source-point");
+
+		        sourcePoints
+		        	.exit()
+		        		.remove();
+
+		       	this.canvas.selectAll("line.seed-line")
+		       		.remove();
+
+		        var seedLine = this.canvas.selectAll("line.seed-line")
+		        	.data(sessionStimuli.SeedStimuli);
+
+		        seedLine
+			        	.attr("x1", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y1", function(d, i) {
+			        		return (yScale(i) - 7);
+			        	})
+			        	.attr("x2", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y2", function(d, i) {
+			        		return (yScale(i) + 5);
+			        	})
+		        	.enter()
+			        	.append("line")
+			        	.attr("x1", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y1", function(d, i) {
+			        		return (yScale(i) - 7);
+			        	})
+			        	.attr("x2", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y2", function(d, i) {
+			        		return (yScale(i) + 5);
+			        	})
+			        	.attr("class", "seed-line");
+
+		        seedLine
+		        	.exit()
+		        		.remove();
+		        	
+
+		       
+		        var xAxis = d3.svg.axis()
 					.scale(xScale)
 					.orient("top")
 					.ticks(5);
