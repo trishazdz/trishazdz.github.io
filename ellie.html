@@ -56,10 +56,6 @@
 
 		var w = 500, h = 500, padding = 20;
 
-		var yScale = d3.scale.linear()
-		    		.domain([0,14])
-		    		.range([padding * 2, h]);
-
 		function Viewmodel() {
 			var self = this;
 			this.chainPlaying = ko.observable(false);
@@ -146,7 +142,6 @@
 			this.getAndSetChain = function(chainId) {
 				var chain = this.fetchChain(chainId);
 				chain = new Chain(chain);
-				console.log(chain);
 
 				chain.sortSessions();
 
@@ -220,12 +215,18 @@
 					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
 				}
 
-				var domainMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
-				var domainMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
+				var domainMin = this.chain().getTappingMinValue();
+				var domainMax = this.chain().getTappingMaxValue();
 
 				var xScale = d3.scale.linear()
 		        	.domain([domainMin, domainMax])
-		        	.range([0, w]);
+		        	.range([padding, w + padding]);
+
+
+
+		        var yScale = d3.scale.linear()
+		    		.domain([0, this.chain().sessions.length])
+		    		.range([padding * 2, h]);
 
 		        var bothData = [];
 
@@ -424,7 +425,13 @@
 		        	.exit()
 		        		.remove();
 
-		       
+		       	var axisMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
+				var axisMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
+
+		       	var xAxisScale = d3.scale.linear()
+		       		.domain([domainMin, domainMax])
+		       		.range([padding, w + padding]);
+
 		        var xAxis = d3.svg.axis()
 					.scale(xScale)
 					.orient("top")
@@ -519,6 +526,12 @@
 		}
 
 		Chain.prototype.sortSessions = function() {
+			this.sessions.map(function(element, index) {
+				if (element.Chain[0] === 'r') {
+					this.sessions.splice(index, 1);
+				};
+			}, this);
+
 			function compare(a,b) {
 				if (Number(a.Chain) < Number(b.Chain)) {
 					return -1;
@@ -530,6 +543,34 @@
 			}
 
 			this.sessions.sort(compare);
+		}
+
+		Chain.prototype.getTappingMaxValue = function() {
+			var sessions = this.sessions;
+			var values = [];
+
+			for (var i = 0; i < sessions.length; i++ ) {
+				sessions[i]['Tapping'].map(function(element) {
+					values.push(Number(element));
+				});
+			}
+
+			var max = Math.max.apply(Math, values);
+			return max;
+		}
+
+		Chain.prototype.getTappingMinValue = function() {
+			var sessions = this.sessions;
+			var values = [];
+
+			for (var i = 0; i < sessions.length; i++ ) {
+				sessions[i]['Tapping'].map(function(element) {
+					values.push(Number(element));
+				});
+			}
+
+			var min = Math.min.apply(Math, values);
+			return min;
 		}
 
 	    
