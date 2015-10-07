@@ -58,7 +58,7 @@
 
 		var yScale = d3.scale.linear()
 		    		.domain([0,14])
-		    		.range([padding * 2, h - padding]);
+		    		.range([padding * 2, h]);
 
 		function Viewmodel() {
 			var self = this;
@@ -69,14 +69,6 @@
 
 			this.chain = ko.observable();
 			this.slideInput = ko.observable();
-			this.slideInputOutput = ko.computed(function() {
-				if (self.chain()) {
-					var width = 300;
-					var newPoint = (self.slideInput() - 1) / (self.chain().sessions.length - 1);
-					var newPlace = width * newPoint;
-					return newPlace;
-				}
-			});
 
 			this.session = ko.computed(function() {
 				if (self.activeSessionId() && self.chain()) {
@@ -101,8 +93,10 @@
 
 			this.canvas = undefined;
 
-			this.hideErrorBars = ko.observable();
-			this.hideSource = ko.observable();
+			this.hideErrorBars = ko.observable(false);
+			this.hideSource = ko.observable(false);
+
+			this.transitionSpeed = 800;
 
 			this.initSvg = function() {
 				var xScale = d3.scale.linear()
@@ -123,7 +117,7 @@
 				this.canvas.append("g")
 			        	.attr("class", "axis")
 			        	.attr("id", "x-axis")
-			        	.attr("transform", "translate(10, 20)")	
+			        	.attr("transform", "translate(0, 20)")	
 			        	.call(xAxis);
 
 			    this.fetchSession();
@@ -225,9 +219,12 @@
 					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
 				}
 
+				var domainMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
+				var domainMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
+
 				var xScale = d3.scale.linear()
-		        	.domain([d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500, 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;})])
-		        	.range([padding, w - padding * 2]);
+		        	.domain([domainMin, domainMax])
+		        	.range([0, w]);
 
 		        var bothData = [];
 
@@ -242,12 +239,13 @@
 
 		        errorMargins
 		        	.transition()
+		        	.duration(self.transitionSpeed)
 		        		.attr("class", function(d) {
 		        			if (self.hideErrorBars()) {
 		        				if (d.session > d.source) {
-		        					return "slower";
+		        					return "error-margin";
 			        			} else {
-			        				return "faster";
+			        				return "error-margin";
 			        			}
 		        			} else {
 		        				if (d.session > d.source) {
@@ -273,11 +271,19 @@
 		        	.enter()
 		        		.append("line")
 		        		.attr("class", function(d) {
-		        			if (d.session > d.source) {
-		        				return "error-margin slower";
-		        			} else {
-		        				return "error-margin faster";
-		        			}
+		        			if (self.hideErrorBars()) {
+		        				if (d.session > d.source) {
+			        				return "error-margin";
+			        			} else {
+			        				return "error-margin";
+			        			}
+		        			} else {		        			
+			        			if (d.session > d.source) {
+			        				return "error-margin slower";
+			        			} else {
+			        				return "error-margin faster";
+			        			}
+			        		}
 		        		})
 		        		.attr("x1", function(d) {
 		        			return xScale(d.session);
@@ -301,6 +307,7 @@
 
 		        sourcePoints
 		        	.transition()
+		        	.duration(self.transitionSpeed)
 		       			.attr("cx", function(d) {
 		        			return xScale(d.source);
 		        		})
@@ -389,12 +396,15 @@
 
 				dataPoints
 					.transition()
+					.duration(self.transitionSpeed)
 			        	.attr("cx", function(d) {
 			        		return xScale(d);
 			       		})
 			        	.attr("cy", function(d, i) {
 			        		return yScale(i);
-			        	});
+			        	})
+			        	.attr("class", "data-point");
+
 			    dataPoints
 					.enter()
 		        		.append("circle")
@@ -407,7 +417,7 @@
 			        	.attr("cy", function(d, i) {
 			        		return yScale(i);
 			        	})
-		        		.attr("class", "data-point");
+			        	.attr("class", "data-point");
 
 		        dataPoints
 		        	.exit()
@@ -425,6 +435,7 @@
 			};
 
 			this.chainToggle = function() {
+				// chain is not playing
 				if (!self.chainPlaying()) {
 					self.chainPlaying(true);
 					self.hideErrorBars(true);
@@ -437,15 +448,20 @@
 						} else {
 							clearInterval(chainPlay);
 							self.chainPlaying(false);
+
+							self.hideErrorBars(false);
+							self.hideSource(false);
+							self.plotSession();
 						}
-						self.slideChange(1);
-					}, 500);
-				} else {
+					}, 900);
+				} else { //chain is playing so cancel it
 					self.chainPlaying(false);
 					clearInterval(chainPlay);
 
 					self.hideErrorBars(false);
 					self.hideSource(false);
+
+					self.plotSession();
 				}
 				
 			};
