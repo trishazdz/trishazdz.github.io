@@ -146,6 +146,7 @@
 			this.getAndSetChain = function(chainId) {
 				var chain = this.fetchChain(chainId);
 				chain = new Chain(chain);
+				console.log(chain);
 
 				chain.sortSessions();
 
@@ -532,7 +533,7 @@
 		}
 
 	    
-		d3.json('2015-10-03.json', function(json) {
+		d3.json('2015-10-05.json', function(json) {
 			data = json;
 
 			d3.json('stimuli.json', function(json) {
