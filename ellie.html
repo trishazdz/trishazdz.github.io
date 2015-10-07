@@ -58,9 +58,9 @@
 
 		function Viewmodel() {
 			var self = this;
-			this.chainPlaying = ko.observable(false);
+			this.chainPlaying = ko.observable(false); //is the chain playing?
 
-			this.sessionId = ko.observable(1306);
+			this.sessionId = ko.observable(1306); // session id input
 			this.activeSessionId = ko.observable();
 
 			this.chain = ko.observable();
@@ -123,12 +123,12 @@
 				var id = typeof inputId === 'number' ? inputId : this.sessionId();
 
 				if (data[id]) {
-					this.slideInput('');
-					this.activeSessionId(id);
-					this.getAndSetChain(data[id].ChainID);
-
 					this.error("");
 					this.errorId("");
+
+					this.slideInput(''); // clear previous slideInput
+					this.activeSessionId(id);
+					this.initChain(data[id].ChainID);
 
 					this.plotSession();
 
@@ -139,18 +139,29 @@
 
 			};
 
-			this.getAndSetChain = function(chainId) {
-				var chain = this.fetchChain(chainId);
-				chain = new Chain(chain);
-
+			this.initChain = function(chainId) {
+				var chain = new Chain(this.getChain(chainId));
 				chain.sortSessions();
-
 				this.chain(chain);
-				var index = this.chain().getSessionIndexById(this.activeSessionId());
-				this.slideInput(index + 1);
-			}
 
-			this.fetchChain = function(chainId) {
+				if ( !this.chain().getSessionById(this.activeSessionId()) ) {
+					// if the chain doesn't retrieve the session it means that it was rejected
+					// just show the first generation of the chain and display error message
+
+					this.errorId(this.activeSessionId());
+					this.error(" You were an outlier so we couldn't use it. But here is your generation.");
+
+					var id = this.chain().getSessionByIndex(0).ID;
+					this.activeSessionId(id);
+					this.slideInput(1);
+				} else {
+					var index = this.chain().getSessionIndexById(this.activeSessionId());
+					this.slideInput(index + 1);
+				}
+				
+			};
+
+			this.getChain = function(chainId) {
 				var chain = [];
 				for (var key in data) {
 					if (data[key].ChainID == chainId) {
@@ -243,19 +254,21 @@
 		        	.transition()
 		        	.duration(self.transitionSpeed)
 		        		.attr("class", function(d) {
-		        			if (self.hideErrorBars()) {
-		        				if (d.session > d.source) {
-		        					return "error-margin";
+		        			if (d.session && d.source) {			
+			        			if (self.hideErrorBars()) {
+			        				if (d.session > d.source) {
+			        					return "error-margin";
+				        			} else {
+				        				return "error-margin";
+				        			}
 			        			} else {
-			        				return "error-margin";
+			        				if (d.session > d.source) {
+				        				return "error-margin slower";
+				        			} else {
+				        				return "error-margin faster";
+				        			}
 			        			}
-		        			} else {
-		        				if (d.session > d.source) {
-			        				return "error-margin slower";
-			        			} else {
-			        				return "error-margin faster";
-			        			}
-		        			}
+			        		};
 		        		})
 		        		.attr("x1", function(d) {
 		        			return xScale(d.session);
@@ -494,6 +507,7 @@
 
 		function Chain(array) {
 			this.sessions = array;
+			this.rejects = [];
 		}
 
 		Chain.prototype.getSessionById = function(id) {
@@ -526,11 +540,19 @@
 		}
 
 		Chain.prototype.sortSessions = function() {
+			var reject = [];
+			var keep = [];
+
 			this.sessions.map(function(element, index) {
 				if (element.Chain[0] === 'r') {
-					this.sessions.splice(index, 1);
-				};
+					reject.push(element);
+				} else {
+					keep.push(element);
+				}
 			}, this);
+
+			this.sessions = keep;
+			this.rejects = reject;
 
 			function compare(a,b) {
 				if (Number(a.Chain) < Number(b.Chain)) {
