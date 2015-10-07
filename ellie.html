@@ -1,57 +1,19 @@
 <!doctype html>
 <html>
 <head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<script src="http://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
 	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js'></script>
+
+	<link rel="stylesheet" href="ellie.css">
+
 </head>
 <body>
-	<style>
-		.axis path, .axis line {
-			fill: none;
-			stroke: black;
-			shape-rendering: crispEdges;
-		}
+	
 
-		.axis text {
-			font-family: sans-serif;
-			font-size: 11px;
-		}
-
-		.data-point {
-			fill: black;
-		}
-
-		.source-point.faster {
-			fill: red;
-		}
-
-		.source-point.slower {
-			fill: orange;
-		}
-
-		.seed-line {
-			stroke: black;
-			stroke-width: .5;
-		}
-
-		.error-margin {
-			stroke-width: 13;
-		}
-
-		.faster {
-			stroke: red;
-		}
-
-		.slower {
-			stroke: orange;
-		}
-		.warning {color:red;}
-
-
-	</style>
 	
 	<form data-bind="submit: fetchSession">
-		<input data-bind="textInput: sessionId" placeholder="Participant ID" />
+		<input type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
 		<button type="submit">Find Data</button>
 	</form>
 	<p class="warning">
@@ -64,20 +26,29 @@
 
 	<div id="canvas-container"></div>
 
+	<div class="row">
+		<div id="slider" class="col-xs-12" data-bind="if: chain">
+			<p id="slide-output" class="col-md-12">Generation: <span data-bind="text: slideInput"></span></p>
 
-	<div id="slider" data-bind="if: chain">
-		<span>1</span>
-		<input id="slide" type="range" step="1"
-	 		data-bind="value: slideInput, attr: {min: 1, max: chain().sessions.length}"
-	 	 />
-	 	<span data-bind="text: chain().sessions.length"></span>
+			<div class="inline-children">
+				<span>1</span>
+				<div class="">
+					<input id="slide" name="generationToggle" type="range" step="1" placeholder="asdf"
+				 		data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
+				 	 />
+				</div>
+			 	<span class="" data-bind="text: chain().sessions.length"></span>
+			 </div>
+		</div>
 
-	 	<p data-bind="text: slideInput"></p>
+		<div class="col-xs-12">
+
+			<button data-bind="click: chainToggle">
+				<span data-bind="if: !chainPlaying()">Play Chain</span>
+				<span data-bind="if: chainPlaying()">Stop</span>
+			</button>
+		</div>
 	</div>
-	<button data-bind="click: chainToggle">
-		<span data-bind="if: !chainPlaying()">Play Chain</span>
-		<span data-bind="if: chainPlaying()">Stop</span>
-	</button>
 
 	<script>
 		
@@ -91,13 +62,21 @@
 
 		function Viewmodel() {
 			var self = this;
-			self.chainPlaying = ko.observable(false);
+			this.chainPlaying = ko.observable(false);
 
 			this.sessionId = ko.observable(1306);
 			this.activeSessionId = ko.observable();
 
 			this.chain = ko.observable();
 			this.slideInput = ko.observable();
+			this.slideInputOutput = ko.computed(function() {
+				if (self.chain()) {
+					var width = 300;
+					var newPoint = (self.slideInput() - 1) / (self.chain().sessions.length - 1);
+					var newPlace = width * newPoint;
+					return newPlace;
+				}
+			});
 
 			this.session = ko.computed(function() {
 				if (self.activeSessionId() && self.chain()) {
@@ -121,6 +100,9 @@
 			this.errorId = ko.observable(undefined);
 
 			this.canvas = undefined;
+
+			this.hideErrorBars = ko.observable();
+			this.hideSource = ko.observable();
 
 			this.initSvg = function() {
 				var xScale = d3.scale.linear()
@@ -227,7 +209,6 @@
 
 			this.slideChange = function(index) {
 				if (index != undefined) {
-					console.log(this.chainSessionIndex());
 					var session = this.chain().getSessionByIndex(this.chainSessionIndex());
 					this.activeSessionId(session.ID);
 					this.plotSession();
@@ -262,10 +243,18 @@
 		        errorMargins
 		        	.transition()
 		        		.attr("class", function(d) {
-		        			if (d.session > d.source) {
-		        				return "error-margin slower";
+		        			if (self.hideErrorBars()) {
+		        				if (d.session > d.source) {
+		        					return "slower";
+			        			} else {
+			        				return "faster";
+			        			}
 		        			} else {
-		        				return "error-margin faster";
+		        				if (d.session > d.source) {
+			        				return "error-margin slower";
+			        			} else {
+			        				return "error-margin faster";
+			        			}
 		        			}
 		        		})
 		        		.attr("x1", function(d) {
@@ -319,10 +308,18 @@
 		        			return yScale(i);
 		        		})
 		        		.attr("class", function(d) {
-		        			if (d.session > d.source ) {
-		        				return "source-point slower";
+		        			if (self.hideSource()) {
+		        				if (d.session > d.source ) {
+			        				return "source-point";
+			        			} else {
+			        				return "source-point";
+			        			}
 		        			} else {
-		        				return "source-point faster";
+		        				if (d.session > d.source ) {
+			        				return "source-point slower";
+			        			} else {
+			        				return "source-point faster";
+			        			}
 		        			}
 		        		});
 
@@ -430,17 +427,25 @@
 			this.chainToggle = function() {
 				if (!self.chainPlaying()) {
 					self.chainPlaying(true);
+					self.hideErrorBars(true);
+					self.hideSource(true);
+
+					self.slideInput(1);
 					chainPlay = setInterval(function() {
 						if (self.slideInput() < self.chain().sessions.length) {
 							self.slideInput(Number(self.slideInput()) + 1);
 						} else {
-							self.slideInput(1);
+							clearInterval(chainPlay);
+							self.chainPlaying(false);
 						}
 						self.slideChange(1);
 					}, 500);
 				} else {
 					self.chainPlaying(false);
 					clearInterval(chainPlay);
+
+					self.hideErrorBars(false);
+					self.hideSource(false);
 				}
 				
 			};
