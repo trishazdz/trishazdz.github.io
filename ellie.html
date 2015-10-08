@@ -23,7 +23,6 @@
 	<div data-bind="if: session">
 		<p data-bind="text: activeSessionId"></p>
 	</div>
-			<img src="https://tse2.mm.bing.net/th?id=OIP.M987e421c759b9aa6f9d2dc27dd48d208H2&pid=15.1" />
 
 	<div id="canvas-container"></div>
 	<h1 data-bind="if: slideInput"><span data-bind="text:slideInput"></span></h1>
@@ -57,7 +56,7 @@
 		
 		var data, stimuli;
 
-		var w = 500, h = 500, padding = 20;
+		var w = 500, h = 500, xPadding = 50, yPadding = 20;
 
 		function Viewmodel() {
 			var self = this;
@@ -105,19 +104,26 @@
 				var xAxis = d3.svg.axis()
 					.scale(xScale)
 					.orient("top")
-					.ticks(5);
+					.ticks(4);
 
 				this.canvas = d3.select("div#canvas-container")
 		        	.append("svg")
 		        	.attr("id", "dv")
-		        	.attr("width", w)
+		        	.attr("width", w + xPadding)
 		        	.attr("height", h);
 
 				this.canvas.append("g")
 			        	.attr("class", "axis")
 			        	.attr("id", "x-axis")
-			        	.attr("transform", "translate(0, 20)")	
+			        	.attr("transform", "translate(0, 20)")
 			        	.call(xAxis);
+
+			    this.canvas.append("text")
+			    	.attr("class", "axis-label")
+			    	.attr("text-anchor", "end")
+			    	.attr("x", w)
+			    	.attr("y", h)
+			    	.text("Time between taps (ms)");
 
 			    this.fetchSession();
 			};
@@ -237,13 +243,13 @@
 
 				var xScale = d3.scale.linear()
 		        	.domain([domainMin, domainMax])
-		        	.range([padding, w + padding]);
+		        	.range([xPadding, w + xPadding]);
 
 
 
 		        var yScale = d3.scale.linear()
 		    		.domain([0, this.chain().sessions.length])
-		    		.range([padding * 2, h]);
+		    		.range([yPadding * 2, h]);
 
 		        var bothData = [];
 
@@ -476,10 +482,6 @@
 		        dataPoints
 		        	.exit()
 		        		.remove();
-
-		       	var xAxisScale = d3.scale.linear()
-		       		.domain([domainMin, domainMax])
-		       		.range([padding, w + padding]);
 
 		        var xAxis = d3.svg.axis()
 					.scale(xScale)
