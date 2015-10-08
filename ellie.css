@@ -29,7 +29,12 @@
 
 		.seed-line {
 			stroke: black;
+			opacity: .7;
 			stroke-width: .5;
+		}
+
+		.seed-label {
+			opacity: .6;
 		}
 
 		#label-faster, .error-margin.faster {

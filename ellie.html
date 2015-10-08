@@ -14,7 +14,7 @@
 	
 	<form data-bind="submit: fetchSession">
 		<input type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
-		<button type="submit">Find Data</button>
+		<button class="btn btn-default" type="submit">Find Data</button>
 	</form>
 	<p class="warning">
 		<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
@@ -38,7 +38,7 @@
 
 		<div class="col-xs-12">
 
-			<button data-bind="click: chainToggle">
+			<button class="btn btn-default" data-bind="click: chainToggle">
 				<span data-bind="if: !chainPlaying()">Play Chain</span>
 				<span data-bind="if: chainPlaying()">Stop</span>
 			</button>
@@ -122,12 +122,12 @@
 			    this.canvas.append("text")
 			    	.attr("id", "label-faster-letter")
 			    	.attr("x", w - 7 * xPadding)
-			    	.attr("y", h/1.8)
+			    	.attr("y", h/1.5)
 			    	.text("f");
 			    this.canvas.append("text")
 			    	.attr("id", "label-faster-word")
 			    	.attr("x", w - 7 * xPadding + 8)
-			    	.attr("y", h / 1.8)
+			    	.attr("y", h / 1.5)
 			    	.text("aster"); /*
 			    this.canvas.append("circle")
 			    	.attr("class", "label-data")
@@ -149,12 +149,12 @@
 			    this.canvas.append("text")
 			    	.attr("id", "label-slower-word")
 			    	.attr("x", w - 3.2 * xPadding)
-			    	.attr("y", h / 1.8)
+			    	.attr("y", h / 1.5)
 			    	.text("slowe");
 			    this.canvas.append("text")
 			    	.attr("id", "label-slower-letter")
 			    	.attr("x", w - 3.2 * xPadding + 60)
-			    	.attr("y", h / 1.8)
+			    	.attr("y", h / 1.5)
 			    	.text("r");
 
 			    this.canvas.append("text")
@@ -198,7 +198,7 @@
 					// just show the first generation of the chain and display error message
 
 					this.errorId(this.activeSessionId());
-					this.error(" You were an outlier so we couldn't use it. But here is your generation.");
+					this.error(" We couldn't use you in this chain, but here is the data for the chain you would have been in");
 
 					var id = this.chain().getSessionByIndex(0).ID;
 					this.activeSessionId(id);
@@ -284,7 +284,7 @@
 
 		        var yScale = d3.scale.linear()
 		    		.domain([0, sessionStimuli.SeedStimuli.length])
-		    		.range([yPadding * 2, h - yPadding * 2]);
+		    		.range([yPadding * 2, h]);
 
 		        var bothData = [];
 
@@ -495,9 +495,9 @@
 
 			    seedLabel
 			    		.attr("transform", function(d) {
-			    			return "rotate(90 " + (xScale(d)+ 10) + "," + (h - 2.5 * yPadding) + ")";
+			    			return "rotate(90 " + (xScale(d)+ 10) + "," + (h - yPadding + 12) + ")";
 			    		})
-			    		.attr("y", h - 2.5 * yPadding )
+			    		.attr("y", h - yPadding + 12 )
 			    	.transition()
 			    	.duration(self.transitionSpeed * 1.5)
 			   			.attr("x", function(d) {
@@ -560,7 +560,7 @@
 
 		        activeGeneration
 		        		.attr("x", w)
-			    		.attr("y", h - yPadding * 3)
+			    		.attr("y", h - yPadding)
 			    		.text(self.slideInput())
 		    		.enter()
 		    			.append("text")
