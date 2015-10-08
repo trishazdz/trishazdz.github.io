@@ -23,8 +23,10 @@
 	<div data-bind="if: session">
 		<p data-bind="text: activeSessionId"></p>
 	</div>
+			<img src="https://tse2.mm.bing.net/th?id=OIP.M987e421c759b9aa6f9d2dc27dd48d208H2&pid=15.1" />
 
 	<div id="canvas-container"></div>
+	<h1 data-bind="if: slideInput"><span data-bind="text:slideInput"></span></h1>
 
 	<div class="row">
 		<div id="slider" class="col-xs-12" data-bind="if: chain">
@@ -33,7 +35,7 @@
 			<div class="inline-children">
 				<span>1</span>
 				<div class="">
-					<input id="slide" name="generationToggle" type="range" step="1" placeholder="asdf"
+					<input id="slide" type="range" step="1"
 				 		data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
 				 	 />
 				</div>
@@ -48,6 +50,7 @@
 				<span data-bind="if: chainPlaying()">Stop</span>
 			</button>
 		</div>
+
 	</div>
 
 	<script>
@@ -226,8 +229,11 @@
 					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
 				}
 
-				var domainMin = this.chain().getTappingMinValue();
-				var domainMax = this.chain().getTappingMaxValue();
+				//var domainMin = this.chain().getTappingMinValue();
+				//var domainMax = this.chain().getTappingMaxValue();
+
+				var domainMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
+				var domainMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
 
 				var xScale = d3.scale.linear()
 		        	.domain([domainMin, domainMax])
@@ -271,7 +277,9 @@
 			        		};
 		        		})
 		        		.attr("x1", function(d) {
-		        			return xScale(d.session);
+		        			if (d.session) {
+			        			return xScale(d.session);		        				
+		        			}
 		        		})
 		        		.attr("y1", function(d, i) {
 		        			return yScale(i);
@@ -286,22 +294,26 @@
 		        	.enter()
 		        		.append("line")
 		        		.attr("class", function(d) {
-		        			if (self.hideErrorBars()) {
-		        				if (d.session > d.source) {
-			        				return "error-margin";
-			        			} else {
-			        				return "error-margin";
-			        			}
-		        			} else {		        			
-			        			if (d.session > d.source) {
-			        				return "error-margin slower";
-			        			} else {
-			        				return "error-margin faster";
-			        			}
-			        		}
+		        			if (d.session && d.source) {
+			        			if (self.hideErrorBars()) {
+			        				if (d.session > d.source) {
+				        				return "error-margin";
+				        			} else {
+				        				return "error-margin";
+				        			}
+			        			} else {		        			
+				        			if (d.session > d.source) {
+				        				return "error-margin slower";
+				        			} else {
+				        				return "error-margin faster";
+				        			}
+				        		}
+				        	}
 		        		})
 		        		.attr("x1", function(d) {
-		        			return xScale(d.session);
+		        			if (d.session) {
+			        			return xScale(d.session);
+		        			}
 		        		})
 		        		.attr("y1", function(d, i) {
 		        			return yScale(i);
@@ -315,7 +327,7 @@
 
 		        errorMargins
 		        	.exit()
-		        		.remove();
+		        		.remove(); 
 
 		       	var sourcePoints = this.canvas.selectAll(".source-point")
 		        	.data(bothData);
@@ -323,53 +335,80 @@
 		        sourcePoints
 		        	.transition()
 		        	.duration(self.transitionSpeed)
+		        		.attr("r", function(d) {
+		        			if (d.session && d.source) {
+		        				return 7;		
+		        			}
+		        		})
 		       			.attr("cx", function(d) {
-		        			return xScale(d.source);
+		       				if (d.source && d.session) {
+		       					return xScale(d.source);
+		       				}
 		        		})
 		        		.attr("cy", function(d, i) {
-		        			return yScale(i);
+		        			if (d.source && d.session) {		        			
+		        				return yScale(i);
+		        			}
 		        		})
 		        		.attr("class", function(d) {
-		        			if (self.hideSource()) {
-		        				if (d.session > d.source ) {
-			        				return "source-point";
+		        			if (d.session && d.source) {
+			        			if (self.hideSource()) {
+			        				if (d.session > d.source ) {
+				        				return "source-point";
+				        			} else {
+				        				return "source-point";
+				        			}
 			        			} else {
-			        				return "source-point";
+			        				if (d.session > d.source ) {
+				        				return "source-point slower";
+				        			} else {
+				        				return "source-point faster";
+				        			}
 			        			}
-		        			} else {
-		        				if (d.session > d.source ) {
-			        				return "source-point slower";
-			        			} else {
-			        				return "source-point faster";
-			        			}
-		        			}
+			        		}
 		        		});
 
 		        sourcePoints
 		        	.enter()
 		        		.append("circle")
 		        		.attr("r", function(d) {
-		        			return 7;
+		        			if (d.session && d.source) {
+		        				return 7;		
+		        			}
 		        		})
 		        		.attr("cx", function(d) {
-		        			return xScale(d.source);
+		        			if (d.session && d.source) {
+		        				return xScale(d.source);
+		        			}
 		        		})
 		        		.attr("cy", function(d, i) {
-		        			return yScale(i);
+		        			if (d.session && d.source) {
+		        				return yScale(i);
+		        			}
 		        		})
 		        		.attr("class", function(d, i) {
-		        			if (d.session > d.source ) {
-		        				return "source-point slower";
-		        			} else {
-		        				return "source-point faster";
-		        			}
+		        			if (d.session && d.source) {
+		        				if (self.hideSource()) {
+				        			if (d.session > d.source ) {
+				        				return "source-point";
+				        			} else {
+				        				return "source-point";
+				        			}
+				        		} else {
+				        			if (d.session > d.source) {
+				        				return "source-point slower";
+				        			} else {
+				        				return "source-point faster";
+				        			}
+				        		}
+			        		}
 		        		});
 
 		        sourcePoints
 		        	.exit()
 		        		.remove();
 
-
+		        
 		        var seedLine = this.canvas.selectAll("line.seed-line")
 		        	.data(sessionStimuli.SeedStimuli);
 
@@ -405,7 +444,7 @@
 		        seedLine
 		        	.exit()
 		        		.remove();
-
+				
 				var dataPoints = this.canvas.selectAll(".data-point")
 					.data(session.Tapping);
 
@@ -437,9 +476,6 @@
 		        dataPoints
 		        	.exit()
 		        		.remove();
-
-		       	var axisMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
-				var axisMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
 
 		       	var xAxisScale = d3.scale.linear()
 		       		.domain([domainMin, domainMax])
