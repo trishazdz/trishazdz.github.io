@@ -25,21 +25,15 @@
 	</div>
 
 	<div id="canvas-container"></div>
-	<h1 data-bind="if: slideInput"><span data-bind="text:slideInput"></span></h1>
 
 	<div class="row">
-		<div id="slider" class="col-xs-12" data-bind="if: chain">
-			<p id="slide-output" class="col-md-12">Generation: <span data-bind="text: slideInput"></span></p>
-
-			<div class="inline-children">
-				<span>1</span>
-				<div class="">
+		<div id="slider" class="col-xs-12 col-md-6" data-bind="if: chain">
+			<span>1</span>
 					<input id="slide" type="range" step="1"
 				 		data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
 				 	 />
-				</div>
-			 	<span class="" data-bind="text: chain().sessions.length"></span>
-			 </div>
+			 <span class="" data-bind="text: chain().sessions.length"></span>
+
 		</div>
 
 		<div class="col-xs-12">
@@ -56,7 +50,8 @@
 		
 		var data, stimuli;
 
-		var w = 500, h = 500, xPadding = 50, yPadding = 20;
+		var w = 500, h = 500, xPadding = 20, yPadding = 30,
+			axisMiddleWidth = 100;
 
 		function Viewmodel() {
 			var self = this;
@@ -97,7 +92,13 @@
 			this.transitionSpeed = 800;
 
 			this.initSvg = function() {
-				var xScale = d3.scale.linear()
+				this.canvas = d3.select("div#canvas-container")
+		        	.append("svg")
+		        	.attr("id", "dv")
+		        	.attr("width", w + 2 * xPadding)
+		        	.attr("height", h + 2 * yPadding);
+
+		        var xScale = d3.scale.linear()
 					.domain([0, 1000])
 					.range([0, w]);
 
@@ -106,25 +107,64 @@
 					.orient("top")
 					.ticks(4);
 
-				this.canvas = d3.select("div#canvas-container")
-		        	.append("svg")
-		        	.attr("id", "dv")
-		        	.attr("width", w + xPadding)
-		        	.attr("height", h);
-
 				this.canvas.append("g")
 			        	.attr("class", "axis")
 			        	.attr("id", "x-axis")
-			        	.attr("transform", "translate(0, 20)")
+			        	.attr("transform", "translate(0, 45)")
 			        	.call(xAxis);
+			    
+			   /* var fasterLabel = this.canvas.append("line")
+			    	.attr("id", "label-faster")
+			    	.attr("x1", w - 4.5 * xPadding)
+			    	.attr("y1", h / 2)
+			    	.attr("x2", w - xPadding * 2)
+			    	.attr("y2", h / 2);*/
+			    this.canvas.append("text")
+			    	.attr("id", "label-faster-letter")
+			    	.attr("x", w - 7 * xPadding)
+			    	.attr("y", h/1.8)
+			    	.text("f");
+			    this.canvas.append("text")
+			    	.attr("id", "label-faster-word")
+			    	.attr("x", w - 7 * xPadding + 8)
+			    	.attr("y", h / 1.8)
+			    	.text("aster"); /*
+			    this.canvas.append("circle")
+			    	.attr("class", "label-data")
+			    	.attr("cx", w - 4.5 * xPadding)
+			    	.attr("cy", h/2)
+			    	.attr("r", 7); */
+/*
+			    this.canvas.append("line")
+			    	.attr("id", "label-slower")
+			    	.attr("x1", w - 4.5 * xPadding)
+			    	.attr("y1", h / 2 + yPadding)
+			    	.attr("x2", w - xPadding * 2)
+			    	.attr("y2", h / 2 + yPadding); /*
+			    this.canvas.append("circle")
+			    	.attr("class", "label-data")
+			    	.attr("cx", w - 2 * xPadding)
+			    	.attr("cy", h/2 + yPadding)
+			    	.attr("r", 7); */
+			    this.canvas.append("text")
+			    	.attr("id", "label-slower-word")
+			    	.attr("x", w - 3.2 * xPadding)
+			    	.attr("y", h / 1.8)
+			    	.text("slowe");
+			    this.canvas.append("text")
+			    	.attr("id", "label-slower-letter")
+			    	.attr("x", w - 3.2 * xPadding + 60)
+			    	.attr("y", h / 1.8)
+			    	.text("r");
 
 			    this.canvas.append("text")
 			    	.attr("class", "axis-label")
-			    	.attr("text-anchor", "end")
-			    	.attr("x", w)
-			    	.attr("y", h)
-			    	.text("Time between taps (ms)");
-
+			    	.attr("text-anchor", "middle")
+			    	.attr("x", w / 2)
+			    	.attr("y", yPadding / 2)
+			    	.attr("width", axisMiddleWidth)
+			    	.text("Time Between Taps (ms)");		    
+	
 			    this.fetchSession();
 			};
 
@@ -235,21 +275,16 @@
 					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
 				}
 
-				//var domainMin = this.chain().getTappingMinValue();
-				//var domainMax = this.chain().getTappingMaxValue();
-
-				var domainMin = d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 500;
+				var domainMin = 0; //= d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 750;
 				var domainMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
 
 				var xScale = d3.scale.linear()
 		        	.domain([domainMin, domainMax])
-		        	.range([xPadding, w + xPadding]);
-
-
+		        	.range([xPadding, w - xPadding]);
 
 		        var yScale = d3.scale.linear()
-		    		.domain([0, this.chain().sessions.length])
-		    		.range([yPadding * 2, h]);
+		    		.domain([0, sessionStimuli.SeedStimuli.length])
+		    		.range([yPadding * 2, h - yPadding * 2]);
 
 		        var bothData = [];
 
@@ -419,37 +454,65 @@
 		        	.data(sessionStimuli.SeedStimuli);
 
 		        seedLine
+		        	.transition()
+		        	.duration(self.transitionSpeed * 1.5)
 			        	.attr("x1", function(d) {
 			        		return xScale(d);
 			        	})
 			        	.attr("y1", function(d, i) {
-			        		return (yScale(i) - 7);
+			        		return (yScale(i) - 6);
 			        	})
 			        	.attr("x2", function(d) {
 			        		return xScale(d);
 			        	})
 			        	.attr("y2", function(d, i) {
-			        		return (yScale(i) + 5);
-			        	})
+			        		return (yScale(i) + 6);
+			        	});
+
+			    seedLine
 		        	.enter()
 			        	.append("line")
 			        	.attr("x1", function(d) {
 			        		return xScale(d);
 			        	})
 			        	.attr("y1", function(d, i) {
-			        		return (yScale(i) - 7);
+			        		return (yScale(i) - 6);
 			        	})
 			        	.attr("x2", function(d) {
 			        		return xScale(d);
 			        	})
 			        	.attr("y2", function(d, i) {
-			        		return (yScale(i) + 5);
+			        		return (yScale(i) + 6);
 			        	})
 			        	.attr("class", "seed-line");
 
-		        seedLine
+			    seedLine
 		        	.exit()
 		        		.remove();
+
+			    var seedLabel = this.canvas.select(".seed-label")
+			    	.data(sessionStimuli.SeedStimuli);
+
+			    seedLabel
+			    		.attr("transform", function(d) {
+			    			return "rotate(90 " + (xScale(d)+ 10) + "," + (h - 2.5 * yPadding) + ")";
+			    		})
+			    		.attr("y", h - 2.5 * yPadding )
+			    	.transition()
+			    	.duration(self.transitionSpeed * 1.5)
+			   			.attr("x", function(d) {
+			   				return xScale(d);
+			   			})
+			   			.attr("text-anchor", "end")
+			    		.text("Original Source");
+			    seedLabel
+			   		.enter()
+			   			this.canvas.append("text")
+			   			.attr("class", "seed-label"); 
+
+			    seedLabel
+			    	.exit()
+			    		.remove();
 				
 				var dataPoints = this.canvas.selectAll(".data-point")
 					.data(session.Tapping);
@@ -490,6 +553,20 @@
 					
 		        this.canvas.select("#x-axis")
 		        	.call(xAxis);
+
+		        
+		        var activeGeneration = this.canvas.selectAll(".activeGeneration")
+		        	.data([0]);
+
+		        activeGeneration
+		        		.attr("x", w)
+			    		.attr("y", h - yPadding * 3)
+			    		.text(self.slideInput())
+		    		.enter()
+		    			.append("text")
+		    			.attr("text-anchor", "end")
+			    		.attr("class", "activeGeneration");
+			    		
 
 			};
 
