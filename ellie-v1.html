@@ -5,7 +5,7 @@
 	<script src="http://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
 	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js'></script>
 
-	<link rel="stylesheet" href="ellie.css">
+	<link rel="stylesheet" href="ellie-v1.css">
 
 </head>
 <body>
@@ -21,7 +21,7 @@
 	</p>
 
 	<div data-bind="if: session">
-		<p>Showing Participant ID: <span data-bind="text: activeSessionId"></span></p>
+		<p data-bind="text: activeSessionId"></p>
 	</div>
 
 	<div id="canvas-container"></div>
@@ -47,19 +47,17 @@
 	</div>
 
 	<script>
+		
 		var data, stimuli;
 
-		var w = 500, h = 500, xPadding = 20, yPadding = 30;
-
-		function setDimensions() {
-
-		};
+		var w = 500, h = 500, xPadding = 20, yPadding = 30,
+			axisMiddleWidth = 100;
 
 		function Viewmodel() {
 			var self = this;
 			this.chainPlaying = ko.observable(false); //is the chain playing?
 
-			this.sessionId = ko.observable(); // session id input
+			this.sessionId = ko.observable(1306); // session id input
 			this.activeSessionId = ko.observable();
 
 			this.chain = ko.observable();
@@ -97,8 +95,8 @@
 				this.canvas = d3.select("div#canvas-container")
 		        	.append("svg")
 		        	.attr("id", "dv")
-		        	.attr("width", w)
-		        	.attr("height", h);
+		        	.attr("width", w + 2 * xPadding)
+		        	.attr("height", h + 2 * yPadding);
 
 		        var xScale = d3.scale.linear()
 					.domain([0, 1000])
@@ -114,22 +112,66 @@
 			        	.attr("id", "x-axis")
 			        	.attr("transform", "translate(0, 45)")
 			        	.call(xAxis);
+			    
+			   /* var fasterLabel = this.canvas.append("line")
+			    	.attr("id", "label-faster")
+			    	.attr("x1", w - 4.5 * xPadding)
+			    	.attr("y1", h / 2)
+			    	.attr("x2", w - xPadding * 2)
+			    	.attr("y2", h / 2);*/
+			    this.canvas.append("text")
+			    	.attr("id", "label-faster-letter")
+			    	.attr("x", w - 7 * xPadding)
+			    	.attr("y", h/1.5)
+			    	.text("f");
+			    this.canvas.append("text")
+			    	.attr("id", "label-faster-word")
+			    	.attr("x", w - 7 * xPadding + 8)
+			    	.attr("y", h / 1.5)
+			    	.text("aster"); /*
+			    this.canvas.append("circle")
+			    	.attr("class", "label-data")
+			    	.attr("cx", w - 4.5 * xPadding)
+			    	.attr("cy", h/2)
+			    	.attr("r", 7); */
+/*
+			    this.canvas.append("line")
+			    	.attr("id", "label-slower")
+			    	.attr("x1", w - 4.5 * xPadding)
+			    	.attr("y1", h / 2 + yPadding)
+			    	.attr("x2", w - xPadding * 2)
+			    	.attr("y2", h / 2 + yPadding); /*
+			    this.canvas.append("circle")
+			    	.attr("class", "label-data")
+			    	.attr("cx", w - 2 * xPadding)
+			    	.attr("cy", h/2 + yPadding)
+			    	.attr("r", 7); */
+			    this.canvas.append("text")
+			    	.attr("id", "label-slower-word")
+			    	.attr("x", w - 3.2 * xPadding)
+			    	.attr("y", h / 1.5)
+			    	.text("slowe");
+			    this.canvas.append("text")
+			    	.attr("id", "label-slower-letter")
+			    	.attr("x", w - 3.2 * xPadding + 60)
+			    	.attr("y", h / 1.5)
+			    	.text("r");
 
 			    this.canvas.append("text")
 			    	.attr("class", "axis-label")
 			    	.attr("text-anchor", "middle")
 			    	.attr("x", w / 2)
 			    	.attr("y", yPadding / 2)
+			    	.attr("width", axisMiddleWidth)
 			    	.text("Time Between Taps (ms)");		    
 	
-			    this.fetchSession(1306);
+			    this.fetchSession();
 			};
 
 			this.fetchSession = function(inputId) {
 				var id = typeof inputId === 'number' ? inputId : this.sessionId();
 
 				if (data[id]) {
-					this.sessionId('');
 					this.error("");
 					this.errorId("");
 
@@ -156,7 +198,7 @@
 					// just show the first generation of the chain and display error message
 
 					this.errorId(this.activeSessionId());
-					this.error(" You're an outlier. We couldn't use you in this chain, but here is the data for the chain you would have been in.");
+					this.error(" We couldn't use you in this chain, but here is the data for the chain you would have been in");
 
 					var id = this.chain().getSessionByIndex(0).ID;
 					this.activeSessionId(id);
@@ -453,15 +495,15 @@
 
 			    seedLabel
 			    		.attr("transform", function(d) {
-			    			return "rotate(-90 " + (xScale(d) + 12) + "," + (h - yPadding * 1.2) + ")";
+			    			return "rotate(90 " + (xScale(d)+ 10) + "," + (h - yPadding + 12) + ")";
 			    		})
-			    		.attr("y", h - yPadding * 1.2 )
+			    		.attr("y", h - yPadding + 12 )
 			    	.transition()
 			    	.duration(self.transitionSpeed * 1.5)
 			   			.attr("x", function(d) {
-			   				return xScale(d) + 12;
+			   				return xScale(d);
 			   			})
-			   			.attr("text-anchor", "beginning")
+			   			.attr("text-anchor", "end")
 			    		.text("Original Source");
 			    seedLabel
 			   		.enter()
@@ -517,7 +559,7 @@
 		        	.data([0]);
 
 		        activeGeneration
-		        		.attr("x", w - xPadding )
+		        		.attr("x", w )
 			    		.attr("y", h - yPadding)
 			    		.text(self.slideInput())
 		    		.enter()

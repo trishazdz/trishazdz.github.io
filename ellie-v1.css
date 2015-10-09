@@ -29,11 +29,12 @@
 
 		.seed-line {
 			stroke: black;
-			stroke-width: 1;
+			opacity: .7;
+			stroke-width: .5;
 		}
 
 		.seed-label {
-			font-size:10px;
+			opacity: .6;
 		}
 
 		#label-faster, .error-margin.faster {
@@ -74,6 +75,4 @@
 
 		#slide {}
 
-		.activeGeneration { font-size: 64px; opacity: .4;}
-
-		#chain-play {margin-right: 10px;}
+		.activeGeneration { font-size: 128px; opacity: .4;}

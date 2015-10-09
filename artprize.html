@@ -49,7 +49,7 @@
 				95 Monroe Center <br>
 				Grand Rapids, MI 49503
 			</span>
-			<!--<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1459.8232817503672!2d-85.66999599999998!3d42.96465200000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8819adc10c8d6ddb%3A0x75ebcada55a8a983!2sFat+Johnny&#39;s+Cheesesteak!5e0!3m2!1sen!2sus!4v1442847796712" width="100%" height="180" frameborder="0" style="border:0" allowfullscreen></iframe> -->
+			
 		</div>
 
 		<div id="data-links-mobile" class="visible-xs">
@@ -64,11 +64,79 @@
 
 	<div class="content">
 			<section class="row">
-				<div class="col-sm-8">
+				<div class="col-sm-12">
 					<h2 id="data">experiment data</h2>
-					<p class="">Check back October 5, 2015.</p>
+				</div>
 
-					<img src="images/dance.svg" />
+				<div class="col-sm-4">
+						<p>Play the entire chain below to see changes across all 
+							of the generations in the chain, or toggle the bar to view a 
+							single generation at a time.
+						</p>
+
+						<p>
+							One of the things to look for in the chains is when they stop 
+							moving / shifting around &mdash when there are no large shifts in 
+							the produced tempo or rhythmic pattern, that suggests that 
+							the rhythm has come to match whatever bias most people 
+							have for tempo or rhythm. If the chain doesn't converge, that 
+							might suggest that everyone in the chain is different, that 
+							there is not a shared preference for a certain tempo or rhyth
+							-
+							mic pattern.
+						</p>
+
+						<p>
+							Chains might converge and then diverge if an individual who's 
+							biases differ from an otherwise homogeneous group contrib
+							-
+							utes. That might happen if, for instance, a chain consists of 
+							mostly adults (18 to 60 years old), and then a kid (&lt;10 y.o.) 
+							contributes. That kid will have a different tempo preference, 
+							and their reproductions will likely be both faster and more 
+							variable than the average adult. This will de-stabalize the 
+							chain - nudge it towards a faster tempo, and possibly towards 
+							a non-isochronous pattern.
+						</p>
+				</div>
+
+					<div class="col-sm-8">
+						<form data-bind="submit: fetchSession">
+						<input type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
+						<button class="btn btn-default" type="submit">Find Data</button>
+						</form>
+						<p class="warning">
+							<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
+						</p>
+
+						<div data-bind="if: session">
+							<p>Showing Participant ID: <span data-bind="text: activeSessionId"></span></p>
+						</div>
+
+						<div id="canvas-container"></div>
+
+						<div class="row">
+							<div id="slider" class="col-xs-12 col-md-6" data-bind="if: chain">
+								<div class="inline-children">
+
+									<button id="chain-play" class="btn btn-default" data-bind="click: chainToggle">
+									<span data-bind="if: !chainPlaying()">Play Chain</span>
+									<span data-bind="if: chainPlaying()">Stop</span>
+									</button>
+
+									<span>1</span>
+									<div>
+											<input id="slide" type="range" step="1"
+										 		data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
+										 	 />
+									</div>
+									 <span class="" data-bind="text: chain().sessions.length"></span>
+								</div>
+
+							</div>
+					</div>
+
+					</div>
 				</div>
 			</section>
 
@@ -323,5 +391,645 @@
 	</footer>
 </div>
 
+	<script src="http://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
+	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js'></script>
+
+	<link rel="stylesheet" href="ellie.css">
+	<script>
+		
+		var data, stimuli;
+
+		var w = 500, h = 500, xPadding = 20, yPadding = 30;
+
+		function setDimensions() {
+
+		};
+
+		function Viewmodel() {
+			var self = this;
+			this.chainPlaying = ko.observable(false); //is the chain playing?
+
+			this.sessionId = ko.observable(); // session id input
+			this.activeSessionId = ko.observable();
+
+			this.chain = ko.observable();
+			this.slideInput = ko.observable();
+
+			this.session = ko.computed(function() {
+				if (self.activeSessionId() && self.chain()) {
+					return self.chain().getSessionById(self.activeSessionId());
+				} else {
+					return undefined;
+				}
+			});
+
+			this.chainSessionIndex = ko.computed(function() {
+				if (self.slideInput() && self.session()) {
+					return self.slideInput() - 1;
+				}
+			});
+
+			this.chainSessionIndex.subscribe(function(index) {
+				self.slideChange(index);
+			});
+
+			this.error = ko.observable(undefined);
+			this.errorId = ko.observable(undefined);
+
+			this.canvas = undefined;
+
+			this.hideErrorBars = ko.observable(false);
+			this.hideSource = ko.observable(false);
+
+			this.transitionSpeed = 800;
+
+			this.initSvg = function() {
+				this.canvas = d3.select("div#canvas-container")
+		        	.append("svg")
+		        	.attr("id", "dv")
+		        	.attr("width", w)
+		        	.attr("height", h);
+
+		        var xScale = d3.scale.linear()
+					.domain([0, 1000])
+					.range([0, w]);
+
+				var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("top")
+					.ticks(4);
+
+				this.canvas.append("g")
+			        	.attr("class", "axis")
+			        	.attr("id", "x-axis")
+			        	.attr("transform", "translate(0, 45)")
+			        	.call(xAxis);
+
+			    this.canvas.append("text")
+			    	.attr("class", "axis-label")
+			    	.attr("text-anchor", "middle")
+			    	.attr("x", w / 2)
+			    	.attr("y", yPadding / 2)
+			    	.text("Time Between Taps (ms)");		    
+	
+			    this.fetchSession(1306);
+			};
+
+			this.fetchSession = function(inputId) {
+				var id = typeof inputId === 'number' ? inputId : this.sessionId();
+
+				if (data[id]) {
+					this.sessionId('');
+					this.error("");
+					this.errorId("");
+
+					this.slideInput(''); // clear previous slideInput
+					this.activeSessionId(id);
+					this.initChain(data[id].ChainID);
+
+					this.plotSession();
+
+				} else {
+					this.errorId(id);
+					this.error(" doesn't exist. Please double check that you have entered the correct ID.");
+				}
+
+			};
+
+			this.initChain = function(chainId) {
+				var chain = new Chain(this.getChain(chainId));
+				chain.sortSessions();
+				this.chain(chain);
+
+				if ( !this.chain().getSessionById(this.activeSessionId()) ) {
+					// if the chain doesn't retrieve the session it means that it was rejected
+					// just show the first generation of the chain and display error message
+
+					this.errorId(this.activeSessionId());
+					this.error(" You're an outlier. We couldn't use you in this chain, but here is the data for the chain you would have been in.");
+
+					var id = this.chain().getSessionByIndex(0).ID;
+					this.activeSessionId(id);
+					this.slideInput(1);
+				} else {
+					var index = this.chain().getSessionIndexById(this.activeSessionId());
+					this.slideInput(index + 1);
+				}
+				
+			};
+
+			this.getChain = function(chainId) {
+				var chain = [];
+				for (var key in data) {
+					if (data[key].ChainID == chainId) {
+						var element = data[key];
+						element.ID = key;
+						chain.push(new Session(element));
+					}
+				};
+
+				return chain;
+			};
+
+			this.getDataElementById = function(id) {
+				if (id >= 1000) {
+					var element = data[id];
+
+					if (element) { 
+						element.ID = id;
+						return element; 
+					} 
+					else { return false; }
+				} else {
+					// fetch seed stimuli
+
+					this.getStimuli()
+				}
+				
+			};
+
+			this.getStimuli = function(seed, type) {
+				var key = seed + type;
+
+				var values = {
+					"0t": stimuli["1"],
+					"1t": stimuli["2"],
+					"2t": stimuli["3"],
+					"3t": stimuli["4"],
+					"0m": stimuli["5"],
+					"1m": stimuli["6"],
+					"2m": stimuli["7"],
+					"3m": stimuli["8"]
+				};
+
+				return values[key];
+			};
+
+			this.slideChange = function(index) {
+				if (index != undefined) {
+					var session = this.chain().getSessionByIndex(this.chainSessionIndex());
+					this.activeSessionId(session.ID);
+					this.plotSession();
+				}	
+			};
+
+			this.plotSession = function() {
+				var session = this.session();
+				var sessionStimuli = this.getStimuli(session.Seed, session.Type);
+
+				if (session.SourceID >= 1000) {
+					var sessionSource = new Session( this.getDataElementById(session.SourceID) );
+				} else {
+					var sessionSource = {Tapping: sessionStimuli.SeedStimuli};
+				}
+
+				var domainMin = 0; //= d3.min(sessionStimuli.SeedStimuli, function(d) { return d; }) - 750;
+				var domainMax = 500 + d3.max(sessionStimuli.SeedStimuli, function(d) {return d;});
+
+				var xScale = d3.scale.linear()
+		        	.domain([domainMin, domainMax])
+		        	.range([xPadding, w - xPadding]);
+
+		        var yScale = d3.scale.linear()
+		    		.domain([0, sessionStimuli.SeedStimuli.length])
+		    		.range([yPadding * 2, h]);
+
+		        var bothData = [];
+
+		        for ( var i = 0; i < sessionSource.Tapping.length; i++ ) {
+		        	bothData.push( {source: sessionSource.Tapping[i], 
+		        					session: session.Tapping[i] } );
+		        };
+
+
+		        var errorMargins = this.canvas.selectAll(".error-margin")
+		        	.data(bothData);
+
+		        errorMargins
+		        	.transition()
+		        	.duration(self.transitionSpeed)
+		        		.attr("class", function(d) {
+		        			if (d.session && d.source) {			
+			        			if (self.hideErrorBars()) {
+			        				if (d.session > d.source) {
+			        					return "error-margin";
+				        			} else {
+				        				return "error-margin";
+				        			}
+			        			} else {
+			        				if (d.session > d.source) {
+				        				return "error-margin slower";
+				        			} else {
+				        				return "error-margin faster";
+				        			}
+			        			}
+			        		};
+		        		})
+		        		.attr("x1", function(d) {
+		        			if (d.session) {
+			        			return xScale(d.session);		        				
+		        			}
+		        		})
+		        		.attr("y1", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        		.attr("x2", function(d) {
+		        			return xScale(d.source);
+		        		})
+		        		.attr("y2", function(d, i) {
+		        			return yScale(i);
+		        		});
+		        errorMargins
+		        	.enter()
+		        		.append("line")
+		        		.attr("class", function(d) {
+		        			if (d.session && d.source) {
+			        			if (self.hideErrorBars()) {
+			        				if (d.session > d.source) {
+				        				return "error-margin";
+				        			} else {
+				        				return "error-margin";
+				        			}
+			        			} else {		        			
+				        			if (d.session > d.source) {
+				        				return "error-margin slower";
+				        			} else {
+				        				return "error-margin faster";
+				        			}
+				        		}
+				        	}
+		        		})
+		        		.attr("x1", function(d) {
+		        			if (d.session) {
+			        			return xScale(d.session);
+		        			}
+		        		})
+		        		.attr("y1", function(d, i) {
+		        			return yScale(i);
+		        		})
+		        		.attr("x2", function(d) {
+		        			return xScale(d.source);
+		        		})
+		        		.attr("y2", function(d, i) {
+		        			return yScale(i);
+		        		});
+
+		        errorMargins
+		        	.exit()
+		        		.remove(); 
+
+		       	var sourcePoints = this.canvas.selectAll(".source-point")
+		        	.data(bothData);
+
+		        sourcePoints
+		        	.transition()
+		        	.duration(self.transitionSpeed)
+		        		.attr("r", function(d) {
+		        			if (d.session && d.source) {
+		        				return 7;		
+		        			}
+		        		})
+		       			.attr("cx", function(d) {
+		       				if (d.source && d.session) {
+		       					return xScale(d.source);
+		       				}
+		        		})
+		        		.attr("cy", function(d, i) {
+		        			if (d.source && d.session) {		        			
+		        				return yScale(i);
+		        			}
+		        		})
+		        		.attr("class", function(d) {
+		        			if (d.session && d.source) {
+			        			if (self.hideSource()) {
+			        				if (d.session > d.source ) {
+				        				return "source-point";
+				        			} else {
+				        				return "source-point";
+				        			}
+			        			} else {
+			        				if (d.session > d.source ) {
+				        				return "source-point slower";
+				        			} else {
+				        				return "source-point faster";
+				        			}
+			        			}
+			        		}
+		        		});
+
+		        sourcePoints
+		        	.enter()
+		        		.append("circle")
+		        		.attr("r", function(d) {
+		        			if (d.session && d.source) {
+		        				return 7;		
+		        			}
+		        		})
+		        		.attr("cx", function(d) {
+		        			if (d.session && d.source) {
+		        				return xScale(d.source);
+		        			}
+		        		})
+		        		.attr("cy", function(d, i) {
+		        			if (d.session && d.source) {
+		        				return yScale(i);
+		        			}
+		        		})
+		        		.attr("class", function(d, i) {
+		        			if (d.session && d.source) {
+		        				if (self.hideSource()) {
+				        			if (d.session > d.source ) {
+				        				return "source-point";
+				        			} else {
+				        				return "source-point";
+				        			}
+				        		} else {
+				        			if (d.session > d.source) {
+				        				return "source-point slower";
+				        			} else {
+				        				return "source-point faster";
+				        			}
+				        		}
+			        		}
+		        		});
+
+		        sourcePoints
+		        	.exit()
+		        		.remove();
+
+		        
+		        var seedLine = this.canvas.selectAll("line.seed-line")
+		        	.data(sessionStimuli.SeedStimuli);
+
+		        seedLine
+		        	.transition()
+		        	.duration(self.transitionSpeed * 1.5)
+			        	.attr("x1", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y1", function(d, i) {
+			        		return (yScale(i) - 6);
+			        	})
+			        	.attr("x2", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y2", function(d, i) {
+			        		return (yScale(i) + 6);
+			        	});
+
+			    seedLine
+		        	.enter()
+			        	.append("line")
+			        	.attr("x1", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y1", function(d, i) {
+			        		return (yScale(i) - 6);
+			        	})
+			        	.attr("x2", function(d) {
+			        		return xScale(d);
+			        	})
+			        	.attr("y2", function(d, i) {
+			        		return (yScale(i) + 6);
+			        	})
+			        	.attr("class", "seed-line");
+
+			    seedLine
+		        	.exit()
+		        		.remove();
+
+			    var seedLabel = this.canvas.select(".seed-label")
+			    	.data(sessionStimuli.SeedStimuli);
+
+			    seedLabel
+			    		.attr("transform", function(d) {
+			    			return "rotate(-90 " + (xScale(d) + 12) + "," + (h - yPadding * 1.2) + ")";
+			    		})
+			    		.attr("y", h - yPadding * 1.2 )
+			    	.transition()
+			    	.duration(self.transitionSpeed * 1.5)
+			   			.attr("x", function(d) {
+			   				return xScale(d) + 12;
+			   			})
+			   			.attr("text-anchor", "beginning")
+			    		.text("Original Source");
+			    seedLabel
+			   		.enter()
+			   			this.canvas.append("text")
+			   			.attr("class", "seed-label"); 
+
+			    seedLabel
+			    	.exit()
+			    		.remove();
+				
+				var dataPoints = this.canvas.selectAll(".data-point")
+					.data(session.Tapping);
+
+				dataPoints
+					.transition()
+					.duration(self.transitionSpeed)
+			        	.attr("cx", function(d) {
+			        		return xScale(d);
+			       		})
+			        	.attr("cy", function(d, i) {
+			        		return yScale(i);
+			        	})
+			        	.attr("class", "data-point");
+
+			    dataPoints
+					.enter()
+		        		.append("circle")
+		        		.attr("r", function(d) {
+		        			return 7;
+		        		})
+		        		.attr("cx", function(d) {
+			        		return xScale(d);
+			       		})
+			        	.attr("cy", function(d, i) {
+			        		return yScale(i);
+			        	})
+			        	.attr("class", "data-point");
+
+		        dataPoints
+		        	.exit()
+		        		.remove();
+
+		        var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("top")
+					.ticks(5);
+					
+		        this.canvas.select("#x-axis")
+		        	.call(xAxis);
+
+		        
+		        var activeGeneration = this.canvas.selectAll(".activeGeneration")
+		        	.data([0]);
+
+		        activeGeneration
+		        		.attr("x", w - xPadding )
+			    		.attr("y", h - yPadding)
+			    		.text(self.slideInput())
+		    		.enter()
+		    			.append("text")
+		    			.attr("text-anchor", "end")
+			    		.attr("class", "activeGeneration");
+			    		
+
+			};
+
+			this.chainToggle = function() {
+				// chain is not playing
+				if (!self.chainPlaying()) {
+					self.chainPlaying(true);
+					self.hideErrorBars(true);
+					self.hideSource(true);
+
+					self.slideInput(1);
+					chainPlay = setInterval(function() {
+						if (self.slideInput() < self.chain().sessions.length) {
+							self.slideInput(Number(self.slideInput()) + 1);
+						} else {
+							clearInterval(chainPlay);
+							self.chainPlaying(false);
+
+							self.hideErrorBars(false);
+							self.hideSource(false);
+							self.plotSession();
+						}
+					}, 900);
+				} else { //chain is playing so cancel it
+					self.chainPlaying(false);
+					clearInterval(chainPlay);
+
+					self.hideErrorBars(false);
+					self.hideSource(false);
+
+					self.plotSession();
+				}
+				
+			};
+		};
+		
+
+		function Session(params) {
+			for (key in params) {
+				this[key] = params[key];
+			}
+		}
+
+		Session.prototype.getAverage = function() {
+			var sum = 0;
+
+			for (var i = 0; i < this.taps.length; i++) {
+				sum += Number(this.taps[i]);
+			}
+
+			return sum / this.taps.length;
+		}
+
+		function Chain(array) {
+			this.sessions = array;
+			this.rejects = [];
+		}
+
+		Chain.prototype.getSessionById = function(id) {
+			var session;
+
+			this.sessions.map(function(element) {
+				if (Number(element.ID) == Number(id)) {
+					session = element;
+				}
+			});
+
+			return session;
+		}
+
+		Chain.prototype.getSessionIndexById = function(id) {
+			var index;
+
+			this.sessions.map(function(element, i) {
+				if (Number(element.ID) == Number(id)) {
+					index = i;
+				}
+			});
+
+			return index;
+		}
+
+		Chain.prototype.getSessionByIndex = function(index) {
+			var session = this.sessions[index];
+			return session;
+		}
+
+		Chain.prototype.sortSessions = function() {
+			var reject = [];
+			var keep = [];
+
+			this.sessions.map(function(element, index) {
+				if (element.Chain[0] === 'r') {
+					reject.push(element);
+				} else {
+					keep.push(element);
+				}
+			}, this);
+
+			this.sessions = keep;
+			this.rejects = reject;
+
+			function compare(a,b) {
+				if (Number(a.Chain) < Number(b.Chain)) {
+					return -1;
+				}
+				if (Number(a.Chain) > Number(b.Chain)) {
+					return 1;
+				}
+				return 0
+			}
+
+			this.sessions.sort(compare);
+		}
+
+		Chain.prototype.getTappingMaxValue = function() {
+			var sessions = this.sessions;
+			var values = [];
+
+			for (var i = 0; i < sessions.length; i++ ) {
+				sessions[i]['Tapping'].map(function(element) {
+					values.push(Number(element));
+				});
+			}
+
+			var max = Math.max.apply(Math, values);
+			return max;
+		}
+
+		Chain.prototype.getTappingMinValue = function() {
+			var sessions = this.sessions;
+			var values = [];
+
+			for (var i = 0; i < sessions.length; i++ ) {
+				sessions[i]['Tapping'].map(function(element) {
+					values.push(Number(element));
+				});
+			}
+
+			var min = Math.min.apply(Math, values);
+			return min;
+		}
+
+	    
+		d3.json('2015-10-05.json', function(json) {
+			data = json;
+
+			d3.json('stimuli.json', function(json) {
+				stimuli = json;
+
+				var vm = new Viewmodel();
+				ko.applyBindings(vm);
+				vm.initSvg();
+			});
+		});
+	</script>
 </body>
 </html>
