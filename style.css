@@ -51,6 +51,8 @@ header h2 {color: #203939;}
 #data-links,#data-links-mobile a {font-size:32px; font-family: 'PT Sans', sans-serif;}
 #data-links div{padding-left:0;}
 
+#data-visualization {margin-bottom: 25px;}
+
 .logistics * {margin-top:0; margin-bottom:0;}
 .logistics h1 {font-family:'PT Sans Caption', sans-serif; color: #203939; margin-top: 10px;
 				font-size:26px; font-weight:400; text-transform: Capitalize;}
