@@ -95,7 +95,6 @@
 
 		#slide * {}
 		#slide input {vertical-align:middle; margin-top:10px;}
-		#slide input::before {content: "1"}
 
 	    input[type='range'] {
 	        -webkit-appearance: none;
