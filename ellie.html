@@ -8,42 +8,45 @@
 	<link rel="stylesheet" href="ellie.css">
 
 </head>
-<body>
+<body style="margin-left:10px">
 	
 
-	
-	<form data-bind="submit: fetchSession">
-		<input type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
-		<button class="btn btn-default" type="submit">Find Data</button>
-	</form>
-	<p class="warning">
-		<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
-	</p>
+	<div id="dv-container">
 
-	<div data-bind="if: session">
-		<p>Showing Participant ID: <span data-bind="text: activeSessionId"></span></p>
-	</div>
+		<form data-bind="submit: fetchSession">
+			<input id="sessionIdInput" type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
+			<button class="btn btn-default" data-bind="css: {disabled: !sessionId()}" type="submit">Find Data</button>
+		</form>
+		<p class="warning">
+			<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
+		</p>
 
-	<div id="canvas-container"></div>
-
-	<div class="row">
-		<div id="slider" class="col-xs-12 col-md-6" data-bind="if: chain">
-			<span>1</span>
-					<input id="slide" type="range" step="1"
-				 		data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
-				 	 />
-			 <span class="" data-bind="text: chain().sessions.length"></span>
-
+		<div data-bind="if: session">
+			<p id="activeSession">Showing Participant ID: <span data-bind="text: activeSessionId"></span></p>
 		</div>
 
-		<div class="col-xs-12">
+		<div id="canvas-container"></div>
 
-			<button class="btn btn-default" data-bind="click: chainToggle">
-				<span data-bind="if: !chainPlaying()">Play Chain</span>
-				<span data-bind="if: chainPlaying()">Stop</span>
-			</button>
+		<div class="row">
+			<div id="slider" data-bind="if: chain">
+				<div class="col-sm-2">
+					<button id="chain-play" class="btn btn-default" data-bind="click: chainToggle">
+						<span data-bind="if: !chainPlaying()">Play Chain</span>
+						<span data-bind="if: chainPlaying()">Stop</span>
+					</button>
+				</div>
+
+
+				<div class="col-sm-9" id="slide">
+					<div>
+						<input type="range" step="1"
+							data-bind="value: slideInput, valueUpdate: 'input', attr: {min: 1, max: chain().sessions.length}"
+							/>
+					</div>
+				</div>
+
+			</div>
 		</div>
-
 	</div>
 
 	<script>
@@ -123,6 +126,8 @@
 			    	.text("Time Between Taps (ms)");		    
 	
 			    this.fetchSession(1306);
+			    document.getElementById("sessionIdInput").focus();
+			    document.getElementById('dv-container').style.width = "500px";
 			};
 
 			this.fetchSession = function(inputId) {
@@ -140,8 +145,13 @@
 					this.plotSession();
 
 				} else {
-					this.errorId(id);
-					this.error(" doesn't exist. Please double check that you have entered the correct ID.");
+					if (!this.sessionId()) {
+						this.errorId("");
+						this.error("Please type in a valid Participant ID");
+					} else {
+						this.errorId(id);
+						this.error(" doesn't exist. Please double check that you have entered the correct ID.");
+					}
 				}
 
 			};
@@ -669,7 +679,7 @@
 		}
 
 	    
-		d3.json('2015-10-05.json', function(json) {
+		d3.json('updated.json', function(json) {
 			data = json;
 
 			d3.json('stimuli.json', function(json) {

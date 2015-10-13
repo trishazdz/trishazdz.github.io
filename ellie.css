@@ -1,8 +1,27 @@
-	.row {margin:0;}
+	 @media (max-width: 991px) {
+		#dv-container { width: 350px;}
+	 }
+
+	 @media (max-width: 767px) {
+	 	#dv-container {width: 300px;}
+	 }	
+	 #dv-container #slide {margin-left: 25px;}
+	 #sessionIdInput {border-top: none; border-right: none; border-left: none; border-bottom: 2px solid #203939;}
+	 #activeSession {color: #203939;}
+
+	 input[type=number]::-webkit-outer-spin-button,
+		input[type=number]::-webkit-inner-spin-button {
+		    -webkit-appearance: none;
+		    margin: 0;
+		}
+
+		input[type=number] {
+		    -moz-appearance:textfield;
+		}
 
 	.axis path, .axis line {
 			fill: none;
-			stroke: black;
+			stroke: #203939;
 			shape-rendering: crispEdges;
 		}
 
@@ -12,7 +31,7 @@
 		}
 
 		.data-point {
-			fill: black;
+			fill: #203939;
 		}
 
 		.source-point {
@@ -72,8 +91,60 @@
 
 		#slider .inline-children * {display: inline-block;}
 
-		#slide {}
+		#slide * {}
+		#slide input {vertical-align:middle; margin-top:10px;}
+		#slide input::before {content: "1"}
 
-		.activeGeneration { font-size: 64px; opacity: .4;}
+	    input[type='range'] {
+	        -webkit-appearance: none;
+	        appearance: none;
+	        -moz-appearance: none;
+	        border-radius: 5px;
+	        box-shadow: inset 1px 1px 1px rgba(000,000,000,0.25);
+	        background-color: #FFF;
+	        height: 8px;
+	        vertical-align: middle;
+	    }
+	    input[type=range]::-webkit-slider-runnable-track {
+	        -webkit-appearance: none;
+	        appearance: none;
+	        border-radius: 5px;
+	        box-shadow: inset 1px 1px 1px rgba(000,000,000,0.25);
+	        background-color: #FFF;
+	        height: 10px;
+	        vertical-align:middle;
+	        border:solid 1px rgba(0,0,0,0.25);
+	    }
+	    input[type='range']::-webkit-slider-thumb {
+	        -webkit-appearance: none;
+	        background-color: #203939;
+	        box-shadow:inset 0px 1px 0px rgba(000,000,000,0.5);
+	        height: 17px;
+	        width: 17px;
+	    }
+	    input[type='range']::-moz-range-track {
+	        -moz-appearance: none;
+	        border-radius: 5px;
+	        box-shadow: inset 1px 1px 1px rgba(000,000,000,0.25);
+	        background-color: #FFF;
+	        height: 8px;
+	        border:solid 1px rgba(0,0,0,0.25);
+	        vertical-align:middle;
+	        margin:0;
+	        padding:0;
+	    }
+	    input[type='range']::-moz-range-thumb {
+	        -moz-appearance: none;
+	        background-color: #203939;
+	        box-shadow:inset 0px 1px 0px rgba(000,000,000,0.5);
+	        height: 17px;
+	        width: 17px;
+	    }
+		
+
+		text {fill: #203939;}
+
+		.activeGeneration { font-size: 64px; opacity: .4; fill: #203939;}
 
 		#chain-play {margin-right: 10px;}
+

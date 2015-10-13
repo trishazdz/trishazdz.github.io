@@ -69,30 +69,33 @@
 				</div>
 
 				<div class="col-sm-4">
-						<p>Play the entire chain below to see changes across all 
-							of the generations in the chain, or toggle the bar to view a 
-							single generation at a time.
+						<p>
+							Look up your data. Do you remember your Participant ID?
+							If not don't worry, just use other data. 
+							Like this person's.
 						</p>
 
 						<p>
-							One of the things to look for in the chains is when they stop 
-							moving / shifting around &mdash; when there are no large shifts in 
-							the produced tempo or rhythmic pattern, that suggests that 
-							the rhythm has come to match whatever bias most people 
-							have for tempo or rhythm. If the chain doesn't converge, that 
-							might suggest that everyone in the chain is different, that 
-							there is not a shared preference for a certain tempo or rhyth
-							-
-							mic pattern.
+							Play the entire chain to watch it 
+							change across generations, or slide the bar to view one
+							generation at a time.
 						</p>
 
 						<p>
-							Chains might converge and then diverge if an individual who's 
-							biases differ from an otherwise homogeneous group contrib
-							-
-							utes. That might happen if, for instance, a chain consists of 
-							mostly adults (18 to 60 years old), and then a kid (&lt;10 y.o.) 
-							contributes. That kid will have a different tempo preference, 
+							When exploring chains look for decreasing variation in 
+							tempo or rhythmic pattern, which suggests that 
+							the rhythm has approached whatever bias most people 
+							hold for tempo/rhythm. A lack of convergence suggests
+							differences amongst the participants, and no 
+							shared preference for a certain tempo or rhythmic pattern.
+						</p>
+
+						<p>
+							Chains might converge then diverge when an individual who's 
+							biases differ from an otherwise homogeneous group contributes. 
+							That might happen if, for instance, a child (&lt;10 y.o.)  contributes 
+							to a chain consisting of mostly adults (18 to 60 years old). 
+							That child will have a different tempo bias, 
 							and their reproductions will likely be both faster and more 
 							variable than the average adult. This will de-stabalize the 
 							chain - nudge it towards a faster tempo, and possibly towards 
@@ -103,7 +106,7 @@
 					<div class="col-sm-8">
 						<form data-bind="submit: fetchSession">
 						<input type="number" data-bind="textInput: sessionId" placeholder="Participant ID" />
-						<button class="btn btn-default" type="submit">Find Data</button>
+						<button class="btn btn-default" data-bind="css: {disabled: !sessionId()}" type="submit">Find Data</button>
 						</form>
 						<p class="warning">
 							<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
@@ -134,10 +137,8 @@
 								</div>
 
 							</div>
+						</div>
 					</div>
-
-					</div>
-				</div>
 			</section>
 
 			<section class="row">
@@ -237,6 +238,16 @@
 
 					<p>Treffner, P. J., & Turvey, M. T. (1993). Journal of Experimental Psychology: Human Perception and Performance, 19(6), 1221.
 					</p>
+
+					<img style="width:100%; margin-top: 25px" src="images/treffner.png" />
+					<p>images from Treffner & Turvey (1993).</p>
+
+					<p> Mode locking between periods of oscillation can be depicted by Arnold tongues. White regions on this figure show stable period ratios.</p>
+
+					<img style="width:100%" src="images/treffner2.png" />
+					<p>images from Treffner & Turvey (1993).</p>
+
+					<p> Mode locking between periods of oscillation can be depicted by Arnold tongues. White regions on this figure show stable period ratios.</p>
 				</div>
 
 				<div class="col-sm-8">
@@ -1019,7 +1030,7 @@
 		}
 
 	    
-		d3.json('2015-10-05.json', function(json) {
+		d3.json('updated.json', function(json) {
 			data = json;
 
 			d3.json('stimuli.json', function(json) {
