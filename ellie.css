@@ -98,7 +98,6 @@
 
 	    input[type='range'] {
 	        -webkit-appearance: none;
-	        appearance: none;
 	        -moz-appearance: none;
 	        border-radius: 5px;
 	        box-shadow: inset 1px 1px 1px rgba(000,000,000,0.25);
