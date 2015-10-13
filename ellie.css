@@ -6,8 +6,10 @@
 	 	#dv-container {width: 300px;}
 	 }	
 	 #dv-container #slide {margin-left: 25px;}
+
+	 #sessionFetchForm {margin-bottom:0;}
 	 #sessionIdInput {border-top: none; border-right: none; border-left: none; border-bottom: 2px solid #203939;}
-	 #activeSession {color: #203939;}
+	 #activeSession {color: #203939; margin-top:0;}
 
 	 input[type=number]::-webkit-outer-spin-button,
 		input[type=number]::-webkit-inner-spin-button {
