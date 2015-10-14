@@ -1,11 +1,6 @@
-	 @media (max-width: 991px) {
-		#dv-container { width: 350px;}
-	 }
-
-	 @media (max-width: 767px) {
-	 	#dv-container {width: 300px;}
-	 }	
 	 #dv-container #slide {margin-left: 25px;}
+	 @media (max-width: 767px) {
+	 }
 
 	 #sessionFetchForm {margin-bottom:0;}
 	 #activeSession {color: #203939; margin-top:0;}

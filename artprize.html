@@ -412,12 +412,27 @@
 
 		var w = 500, h = 500, xPadding = 20, yPadding = 30;
 
-		function setDimensions() {
-
+		function checkGrid() {
+			var width = window.innerWidth;
+			if (width < 768) {
+				return "xs";
+			}
+			if (width >= 768 && width < 992) {
+				return "sm";
+			}
+			if (width >= 992 && width < 1200) {
+				return "md";
+			}
+			if (width >= 1200) {
+				return "lg";
+			}
 		};
+
 
 		function Viewmodel() {
 			var self = this;
+			this.currentGrid = undefined;
+
 			this.chainPlaying = ko.observable(false); //is the chain playing?
 
 			this.sessionId = ko.observable(); // session id input
@@ -477,6 +492,7 @@
 			        	.call(xAxis);
 
 			    this.canvas.append("text")
+			    	.attr("id", "axis-label")
 			    	.attr("class", "axis-label")
 			    	.attr("text-anchor", "middle")
 			    	.attr("x", w / 2)
@@ -484,8 +500,58 @@
 			    	.text("Time Between Taps (ms)");		    
 	
 			    this.fetchSession(1306);
-			    document.getElementById("sessionIdInput").focus();
-			    document.getElementById('dv-container').style.width = "500px";
+			};
+
+			this.refreshSvg = function() {
+				var width = document.getElementById("dv-container").offsetWidth;
+				var currentG = checkGrid();
+
+				if (this.currentGrid != currentG) {
+					this.currentGrid = currentG;
+					if (currentG == 'md' || currentG == 'lg') {
+						xPadding = 20;
+						w = width;
+						h = 500;
+					}
+					if (currentG == 'sm') {
+						xPadding = 20;
+						w = width;
+						h = 400;
+					}
+					if (currentG == 'xs') {
+						xPadding = 15;
+						w = width - xPadding * 2;
+						h = 350;
+					}
+
+
+					d3.select('#dv')
+						.attr("width", w )
+						.attr("height", h);
+
+					var xScale = d3.scale.linear()
+						.domain([0, 1000])
+						.range([0, w]);
+
+					var xAxis = d3.svg.axis()
+						.orient("top")
+						.scale(xScale)
+						.ticks(4);
+
+					this.canvas.select("#x-axis")
+						.attr("class", "axis")
+						.attr("id", "x-axis")
+						.attr("transform", "translate(0, 45)")
+						.call(xAxis);
+
+					this.canvas.select("#axis-label")
+						.attr("class", "axis-label")
+						.attr("text-anchor", "middle")
+						.attr("x", w/2)
+						.attr("Y", yPadding/2);
+
+					this.plotSession();
+				}
 			};
 
 			this.fetchSession = function(inputId) {
@@ -1046,6 +1112,23 @@
 				var vm = new Viewmodel();
 				ko.applyBindings(vm);
 				vm.initSvg();
+				vm.refreshSvg();
+
+				var isMobile = { 
+					Android: function() { return navigator.userAgent.match(/Android/i); }, 
+					BlackBerry: function() { return navigator.userAgent.match(/BlackBerry/i); }, 
+					iOS: function() { return navigator.userAgent.match(/iPhone|iPad|iPod/i); }, 
+					Opera: function() { return navigator.userAgent.match(/Opera Mini/i); }, 
+					Windows: function() { return navigator.userAgent.match(/IEMobile/i); }, 
+					any: function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows()); } 
+				};
+
+				if (!isMobile.any()) {
+					window.addEventListener("resize", function(){
+					    vm.refreshSvg();
+					});
+				}
+				
 			});
 		});
 	</script>
