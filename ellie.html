@@ -53,6 +53,10 @@
 		var data, stimuli;
 
 		var w = 500, h = 500, xPadding = 20, yPadding = 30;
+		
+		var toolTip = d3.select('body').append("div")
+		        	.attr("class", "tooltip")
+		        	.style("opacity", 0);
 
 		function setDimensions() {
 
@@ -126,8 +130,6 @@
 			    	.text("Time Between Taps (ms)");		    
 	
 			    this.fetchSession(1306);
-			    document.getElementById("sessionIdInput").focus();
-			    document.getElementById('dv-container').style.width = "500px";
 			};
 
 			this.fetchSession = function(inputId) {
@@ -436,6 +438,21 @@
 			        	.attr("y2", function(d, i) {
 			        		return (yScale(i) + 6);
 			        	});
+			    seedLine
+			    		.on("mouseover", function(d) {
+			        		toolTip.transition()
+			        			.duration(100)
+			        			.style("opacity", .9);
+			        		toolTip.text("asdfasdfasd")
+			        			.style("left", (d3.event.pageX) + "px")
+			        			.style("top", (d3.event.pageY - 50) + "px");
+			        	})
+			        	.on("mouseout", function(d) {
+			        		toolTip.transition()
+			        			.delay(500 )
+			        			.duration(500)
+			        			.style("opacity", 0);
+			        	});
 
 			    seedLine
 		        	.enter()
@@ -452,11 +469,26 @@
 			        	.attr("y2", function(d, i) {
 			        		return (yScale(i) + 6);
 			        	})
-			        	.attr("class", "seed-line");
+			        	.attr("class", "seed-line")
+			        	.on("mouseover", function(d) {
+			        		toolTip.transition()
+			        			.duration(200)
+			        			.style("opacity", .9);
+			        		toolTip.text("asdfasdfasd")
+			        			.style("left", (d3.event.pageX) + "px")
+			        			.style("top", (d3.event.pageY - 50) + "px");
+			        	})
+			        	.on("mouseout", function(d) {
+			        		toolTip.transition()
+			        			.duration(500)
+			        			.style("opacity", 0);
+			        	});
 
 			    seedLine
 		        	.exit()
 		        		.remove();
+
+		        /*
 
 			    var seedLabel = this.canvas.select(".seed-label")
 			    	.data(sessionStimuli.SeedStimuli);
@@ -481,6 +513,7 @@
 			    seedLabel
 			    	.exit()
 			    		.remove();
+			   	*/
 				
 				var dataPoints = this.canvas.selectAll(".data-point")
 					.data(session.Tapping);

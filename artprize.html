@@ -412,6 +412,10 @@
 
 		var w = 500, h = 500, xPadding = 20, yPadding = 30;
 
+		var toolTip = d3.select('body').append("div")
+		        	.attr("class", "tooltip")
+		        	.style("opacity", 0);
+
 		function checkGrid() {
 			var width = window.innerWidth;
 			if (width < 768) {
@@ -756,7 +760,27 @@
 		        		})
 		        		.attr("y2", function(d, i) {
 		        			return yScale(i);
-		        		});
+		        		})
+		        		.on("mouseover", function(d) {
+			        		toolTip.transition()
+			        			.duration(300)
+			        			.style("opacity", .9);
+			        		toolTip
+			        			.text(function() {
+			        				if (d.session < d.source) {
+			        					return Math.round(d.source - d.session) + " ms faster";
+			        				} else {
+			        					return Math.round(d.session - d.source) + " ms slower";
+			        				}
+			        			})
+			        			.style("left", (d3.event.pageX) + "px")
+			        			.style("top", (d3.event.pageY - 20) + "px");
+			        	})
+			        	.on("mouseout", function(d) {
+			        		toolTip.transition()
+			        			.duration(100)
+			        			.style("opacity", 0);
+			        	});
 
 		        errorMargins
 		        	.exit()
@@ -835,7 +859,27 @@
 				        			}
 				        		}
 			        		}
-		        		});
+		        		})
+		        		.on("mouseover", function(d) {
+			        		toolTip.transition()
+			        			.duration(300)
+			        			.style("opacity", .9);
+			        		toolTip
+			        			.text(function() {
+			        				if (d.session < d.source) {
+			        					return Math.round(d.source - d.session) + " ms faster";
+			        				} else {
+			        					return Math.round(d.session - d.source) + " ms slower";
+			        				}
+			        			})
+			        			.style("left", (d3.event.pageX) + "px")
+			        			.style("top", (d3.event.pageY - 20) + "px");
+			        	})
+			        	.on("mouseout", function(d) {
+			        		toolTip.transition()
+			        			.duration(100)
+			        			.style("opacity", 0);
+			        	});
 
 		        sourcePoints
 		        	.exit()
@@ -887,13 +931,13 @@
 
 			    seedLabel
 			    		.attr("transform", function(d) {
-			    			return "rotate(-90 " + (xScale(d) + 12) + "," + (h - yPadding * 1.2) + ")";
+			    			return "rotate(90 " + (xScale(d) + 5) + "," + yPadding * 2.2 + ")";
 			    		})
-			    		.attr("y", h - yPadding * 1.2 )
+			    		.attr("y", yPadding * 2.2)
 			    	.transition()
 			    	.duration(self.transitionSpeed * 1.5)
 			   			.attr("x", function(d) {
-			   				return xScale(d) + 12;
+			   				return xScale(d) + 5;
 			   			})
 			   			.attr("text-anchor", "beginning")
 			    		.text("Original Source");
@@ -907,13 +951,13 @@
 			    		.remove();
 				
 				var dataPoints = this.canvas.selectAll(".data-point")
-					.data(session.Tapping);
+					.data(bothData);
 
 				dataPoints
 					.transition()
 					.duration(self.transitionSpeed)
 			        	.attr("cx", function(d) {
-			        		return xScale(d);
+			        		return xScale(d.session);
 			       		})
 			        	.attr("cy", function(d, i) {
 			        		return yScale(i);
@@ -927,12 +971,32 @@
 		        			return 7;
 		        		})
 		        		.attr("cx", function(d) {
-			        		return xScale(d);
+			        		return xScale(d.session);
 			       		})
 			        	.attr("cy", function(d, i) {
 			        		return yScale(i);
 			        	})
-			        	.attr("class", "data-point");
+			        	.attr("class", "data-point")
+			        	.on("mouseover", function(d) {
+			        		toolTip.transition()
+			        			.duration(300)
+			        			.style("opacity", .9);
+			        		toolTip
+			        			.text(function() {
+			        				if (d.session < d.source) {
+			        					return Math.round(d.source - d.session) + " ms faster";
+			        				} else {
+			        					return Math.round(d.session - d.source) + " ms slower";
+			        				}
+			        			})
+			        			.style("left", (d3.event.pageX) + "px")
+			        			.style("top", (d3.event.pageY - 20) + "px");
+			        	})
+			        	.on("mouseout", function(d) {
+			        		toolTip.transition()
+			        			.duration(100)
+			        			.style("opacity", 0);
+			        	});
 
 		        dataPoints
 		        	.exit()
@@ -1123,11 +1187,9 @@
 					any: function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows()); } 
 				};
 
-				if (!isMobile.any()) {
 					window.addEventListener("resize", function(){
 					    vm.refreshSvg();
 					});
-				}
 				
 			});
 		});
