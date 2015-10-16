@@ -98,7 +98,11 @@
 
 		.warning {color:red;}
 
-		#slider .inline-children * {display: inline-block;}
+		#randomChain .inputs div:first-child {margin-right: 20px;}
+
+		#fetchRandomChain {margin-bottom:25px;}
+
+		.inline-children > div {display: inline-block;}
 
 		#slide * {}
 
@@ -107,6 +111,8 @@
 		text {fill: #203939;}
 
 		.activeGeneration { font-size: 64px; opacity: .4; fill: #203939;}
+		.dash {font-size: 32px; opacity: .4; fill: #203939;}
+		.chainLength {font-size: 28px; opacity: .4; fill: #203939;}
 
 		#chain-play {margin-right: 10px;}
 

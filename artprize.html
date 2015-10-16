@@ -104,16 +104,35 @@
 				</div>
 
 					<div class="col-sm-8" id="dv-container">
-						<form id="sessionFetchForm" data-bind="submit: fetchSession">
+						<form id="sessionFetchForm" class="col-sm-6" data-bind="submit: fetchSession">
 							<input id="sessionIdInput" type="number" data-bind="textInput: sessionId" placeholder=" Participant ID" />
 							<button class="btn btn-default" data-bind="css: {disabled: !sessionId()}" type="submit">Find Data</button>
 						</form>
 
-						<p class="warning">
+						<form id="randomChain" class="col-sm-6 inline-children" data-bind="submit: fetchRandomChain">
+							<div>
+								<div class="inline-children inputs">
+									<div><input type="radio" value="a" data-bind="checked: randomChain.mode"> Audio</div>
+									<div><input type="radio" value="v" data-bind="checked: randomChain.mode"> Visual</div>
+								</div>
+
+								<div class="inline-children inputs">
+									<div><input type="radio" value="m" data-bind="checked: randomChain.type"> Meter</div>
+									<div><input type="radio" value="t" data-bind="checked: randomChain.type"> Tempo</div>
+								</div>
+							</div>
+
+							<div>
+								<button class="btn btn-default" id="fetchRandomChain" data-bind="css: {disabled: !randomChain.mode() || !randomChain.type()}" type="submit">Get Random Chain</button>
+							</div>
+
+						</form>
+
+						<p class="warning col-xs-12">
 							<span data-bind="text: errorId"></span><span data-bind="text: error"></span>
 						</p>
 
-						<div data-bind="if: session">
+						<div class="col-xs-12" data-bind="if: session">
 							<p id="activeSession">Showing Participant ID: <span data-bind="text: activeSessionId"></span></p>
 						</div>
 
@@ -473,6 +492,11 @@
 
 			this.transitionSpeed = 800;
 
+			this.randomChain = {
+				mode: ko.observable(),
+				type: ko.observable()
+			};
+
 			this.initSvg = function() {
 				this.canvas = d3.select("div#canvas-container")
 		        	.append("svg")
@@ -504,13 +528,14 @@
 			    	.text("Time Between Taps (ms)");		    
 	
 			    this.fetchSession(1306);
+
 			};
 
 			this.refreshSvg = function() {
 				var width = document.getElementById("dv-container").offsetWidth;
 				var currentG = checkGrid();
 
-				if (this.currentGrid != currentG) {
+				if (true) {
 					this.currentGrid = currentG;
 					if (currentG == 'md' || currentG == 'lg') {
 						xPadding = 20;
@@ -555,6 +580,28 @@
 						.attr("Y", yPadding/2);
 
 					this.plotSession();
+				}
+			};
+
+			this.fetchRandomChain = function() {
+				var type = this.randomChain.type();
+				var mode = this.randomChain.mode();
+
+				if (type && mode) {
+					var key = String(type + mode);
+
+					if (!this.randomChain[key]) {
+						this.randomChain[key] = this.getChains(type, mode);
+					}
+
+					var randomChain = this.randomChain[key][Math.floor(Math.random() * this.randomChain[key].length)];
+
+					if (randomChain == this.session().ChainID) {
+						// prevent showing same chain.
+						this.fetchRandomChain();
+					} else {
+						this.initRandomChain(randomChain);
+					}
 				}
 			};
 
@@ -604,6 +651,35 @@
 					this.slideInput(index + 1);
 				}
 				
+			};
+
+			this.initRandomChain = function(chainId) {
+				var chain = new Chain(this.getChain(chainId));
+				chain.sortSessions();
+				if (chain.sessions.length > 0) {
+					this.chain(chain);
+
+					var id = this.chain().getSessionByIndex(0).ID;
+					this.activeSessionId(id);
+					this.slideInput(1);
+				} else {
+					// account for weird outlier chains where all
+					// sessions were rejected
+					this.fetchRandomChain();
+				}
+			}
+
+			this.getChains = function(type, mode) {
+				var chains = []
+				for (var key in data) {
+					if (data[key].Type == type && data[key].Mode == mode) {
+						if ( chains.indexOf(data[key].ChainID) == -1 ) {
+							chains.push(data[key].ChainID);
+						}
+					}
+				}
+
+				return chains;
 			};
 
 			this.getChain = function(chainId) {
@@ -957,10 +1033,14 @@
 					.transition()
 					.duration(self.transitionSpeed)
 			        	.attr("cx", function(d) {
-			        		return xScale(d.session);
+			        		if (d.session && d.source) {
+				        		return xScale(d.session);		        			
+			        		}
 			       		})
 			        	.attr("cy", function(d, i) {
-			        		return yScale(i);
+			        		if (d.session && d.source) {
+				        		return yScale(i);		        			
+			        		}
 			        	})
 			        	.attr("class", "data-point");
 
@@ -968,13 +1048,19 @@
 					.enter()
 		        		.append("circle")
 		        		.attr("r", function(d) {
-		        			return 7;
+		        			if (d.session && d.source) {
+		        				return 7;
+		        			}
 		        		})
 		        		.attr("cx", function(d) {
-			        		return xScale(d.session);
+		        			if (d.session && d.source) {
+			        			return xScale(d.session);		        				
+		        			}
 			       		})
 			        	.attr("cy", function(d, i) {
-			        		return yScale(i);
+			        		if (d.session && d.source) {
+			        			return yScale(i);			        			
+			        		}
 			        	})
 			        	.attr("class", "data-point")
 			        	.on("mouseover", function(d) {
@@ -1015,14 +1101,37 @@
 		        	.data([0]);
 
 		        activeGeneration
-		        		.attr("x", w - xPadding )
+		        		.attr("x", w - xPadding * 3 )
 			    		.attr("y", h - yPadding)
 			    		.text(self.slideInput())
 		    		.enter()
 		    			.append("text")
 		    			.attr("text-anchor", "end")
 			    		.attr("class", "activeGeneration");
-			    		
+
+			    var chainLength = this.canvas.selectAll(".chainLength")
+			    	.data([0]);
+
+			    chainLength
+				    	.attr("x", w - xPadding)
+				    	.attr("y", h - yPadding)
+				    	.text(this.chain().sessions.length)
+			    	.enter()
+			    		.append("text")
+			    			.attr("text-anchor", "end")
+			    			.attr("class", "chainLength"); 
+
+			    var dash = this.canvas.selectAll(".dash")
+			    	.data([0]);
+			    dash
+			    		.attr("x", w - xPadding * 2.5)
+			    		.attr("y", h - yPadding)
+			    		.text("/")
+			    	.enter()
+			    		.append("text")
+			    			.attr("text-anchor", "end")
+			    			.attr("class", "dash");
+
 
 			};
 
@@ -1187,9 +1296,9 @@
 					any: function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows()); } 
 				};
 
-					window.addEventListener("resize", function(){
-					    vm.refreshSvg();
-					});
+				window.addEventListener("resize", function(){
+					vm.refreshSvg();
+				});
 				
 			});
 		});
