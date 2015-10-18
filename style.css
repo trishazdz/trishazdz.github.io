@@ -77,6 +77,7 @@ div.content .citations p {font-family: 'PT Sans Caption', sans-serif; color: #20
 
 @media (max-width: 767px) {
 	#about-me section {margin-bottom: 25px;}
+	#about-me .team {margin-bottom: 15px;}
 }
 
 @media (min-width: 768px) {
