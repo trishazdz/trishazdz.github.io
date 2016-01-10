@@ -3,6 +3,8 @@
 	<head>
 	<meta name="viewport" content="width=320; user-scalable=no" />
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+	<script type="text/javascript" charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 	<title>Camera</title>
 	
 	<style>
@@ -36,7 +38,6 @@
     $(document).ready(function() {
         console.log('onReady');
 		$("#takePictureField").on("change",gotPic);
-		$("#yourimage").load(getSwatches);
 		desiredWidth = window.innerWidth;
         
         if(!("url" in window) && ("webkitURL" in window)) {
