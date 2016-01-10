@@ -1,37 +1,27 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-	<meta name="viewport" content="width=320; user-scalable=no" />
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=320, user-scalable=no" />
+	<meta http-equiv="Content-type" content="text/html, harset=utf-8">
 
-	<script type="text/javascript" charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 	<title>Camera</title>
 	
-	<style>
-	#yourimage {
-		width:100%;	
-	}
-	
-	#swatches {
-		width: 100%;
-		height: 50px;	
-	}
-	.swatch {
-		width:18%;
-		height: 50px;
-		border-style:solid;
-		border-width:thin;	
-		float: left;
-		margin-right: 3px;	
-	}
-	</style>
+	<link href="lib/css/jquery-filestyle.min.css">
 	</head>
 
 	<body>
+		<h1>Camera</h1>
 
-		<input type="file" capture="camera" accept="image/*" placeholder="Take Photo" id="takePictureField">
+		<input type="file" 
+		class="jfilestyle" data-theme="blue"
+		data-buttonText="Take Photo" data-input="false"
+		capture="camera" accept="image/*" 
+		id="takePictureField">
         
 		<img id="yourimage">
+
+	<script type="text/javascript" charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+	<script src="lib/js/jquery-filestyle.min.js"></script>
 
 	</body>
 
