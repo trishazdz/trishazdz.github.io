@@ -1,0 +1,11 @@
+/*-------------------
+  Style.css
+ -------------------*/
+
+header {background-color: #ccc;}
+header > { margin-top: 10px;}
+
+footer {background-color: #ccc; bottom:0; position: fixed; width:100%;}
+footer >:first-child {margin-top: 10px;}
+
+footer >:last-child { margin-bottom: 10px; }
