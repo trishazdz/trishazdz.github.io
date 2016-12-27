@@ -1,100 +1,115 @@
-body {max-width:100%; overflow-x: hidden;}
-.container {max-width:1050px;}
-.row {margin-left:0; margin-right:0;}
-.content {margin-top: 350px;}
-h1 {font-family: 'PT Sans', sans-serif; color:#203939; font-weight:700; text-transform: uppercase;}
-h2 {font-family: 'PT Sans Caption', sans-serif; color: #F79973;}
-h3 {font-family: 'PT Sans', sans-serif; color:#F79973;}
-
-p {font-family: 'PT Serif', serif; color: #203939; font-size:16px;}
-
-a {color:#F79973;}
-a:hover {text-decoration: none;}
-
-#top-svg {height:140px; margin-bottom:10px; position: relative; right:15%;}
-#bottom-svg {height:140px; margin-bottom:0; position: relative; right:15%;}
-
-@media (max-width: 767px) {
-	.logistics {margin-top: 25px; margin-bottom:25px;}
-	.content {margin-top:25px;}
-
-	img {width:100%;}
-}
-@media (max-width: 991px) {
-	h1 {font-size: 42px;}
-	h2 {font-size: 28px;}
-}
-@media (min-width: 768px)  {
-	#top-svg {height:220px; margin-bottom:30px; position: relative; right:50%; position:relative;}	
-	#bottom-svg {height:220px; margin-bottom:0; position: relative; right:42%;}
-
-	img {width: 70%;}
+html { 
+	font-size: 62.5%;
 }
 
-@media (min-width: 992px) {
-	h1 {font-size: 58px;}
-	h2 {font-size: 32px;}
-	#top-svg {height:320px; margin-bottom:30px; position: relative; right:50%; position:relative;}	
-	#bottom-svg {height:320px; margin-bottom:0; position: relative; right:42%;}
+body {
+	max-width: 90rem;
+	margin: 1rem auto;
+	font-family: Arial;
+	font-size: 1.6rem;
 }
 
-@media (min-width: 1200px) {
-	h1 {font-size: 64px;}
-	h2 {font-size: 32px;}
+img.fit {
+	max-width: 100%;
 }
 
-header h2 {color: #203939;}
-#project-title {margin-bottom:0; margin-top:0;}
-#project-description {margin-top: 0;}
-#project-description-more {margin-left:0; margin-right:0; padding-left:0; padding-right:0;}
-#data-links {margin-top:120px;}
-#data-links,#data-links-mobile a {font-size:32px; font-family: 'PT Sans', sans-serif;}
-#data-links div{padding-left:0;}
-
-#data-visualization {margin-bottom: 25px;}
-
-.logistics * {margin-top:0; margin-bottom:0;}
-.logistics h1 {font-family:'PT Sans Caption', sans-serif; color: #203939; margin-top: 10px;
-				font-size:26px; font-weight:400; text-transform: Capitalize;}
-.logistics h2 {font-family: 'PT Sans Narrow', sans-serif; font-weight:700; color: #203939; font-size: 48px;}
-.logistics p {font-family: 'PT Sans', sans-serif; margin-bottom:5px;}
-.logistics span {font-family: 'PT Sans Caption', sans-serif; font-size: 12px; margin-bottom:5px;}
-.logistics iframe {margin-top: 10px;}
-
-
-
-
-div.content p {margin-bottom: 20px;}
-
-
-.caption {font-size: 12px; font-family: 'PT Sans Caption', sans-serif;}
-
-div.content .citations p {font-family: 'PT Sans Caption', sans-serif; color: #203939; font-size: 12px; 
-				margin-bottom: 5px;}
-
-.social a {display: inline; margin-right:10px;}
-.social img {width:50px;}
-
-@media (max-width: 767px) {
-	#about-me section {margin-bottom: 25px;}
-	#about-me .team {margin-bottom: 15px;}
+br {
+	margin-bottom: 2rem;
 }
 
-@media (min-width: 768px) {
-
-	#about-me section {margin-bottom: 50px;}
+::selection {
+	background-color: #8b713d;
+	color: white;
+}
+::-moz-selection {
+	background-color: #8b713d;
+	color: white;
+}
+nav.main {
+	margin-bottom: 3rem;
+}
+nav.main a {
+	font-size: 1.3rem;
+	margin-left: 1rem;
 }
 
-/* LANDIN PAGE STYLING */
+.align-right {
+	text-align: right;
+}
+.flex {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  -ms-box-orient: horizontal;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -moz-flex;
+  display: -webkit-flex;
+  display: flex;
+}
 
-#ellie {font-family: 'PT Serif', serif; font-weight:400; color:#203939; text-align: center;
-			font-size:40px; text-transform: capitalize;}
+.wrap {
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+.flex.equal *{
+	flex: 1;
+}
 
-#landing-page a {font-size: 30px; color: #203939;}
-#landing-page a:hover {color:#F79973;}
-#landing-page p {text-align: center;}
-#landing-page section {margin-top:50px;}
+.flex.center {
+	justify-content: space-around;
+}
 
-@media (max-width: 767px) {
-	#landing-page a {font-size: 20px;}
+ul {
+	list-style: none;
+	list-style-type: none;
+	padding:0;
+}
+
+ul a {
+	text-decoration: none;
+	color: black;
+}
+
+ul li h1,p {
+	font-size: 1.5rem;
+}
+
+#name {
+	font-size: 2.4rem;
+	font-weight: 400;
+	font-family: PT-Serif;
+}
+header p {
+	font-size: 1.2rem;
+	padding: 0 4rem;
+}
+
+figcaption {
+	font-size: 1.2rem;
+}
+
+#bio p {
+	line-height: 2rem;
+	color: #444;
+}
+
+h1, p {
+	margin: 0 0 1rem 0	;
+}
+
+.flex > div {
+	margin: 1rem 1rem;
+}
+
+.flex-1 {
+	flex:1;
+}
+
+.flex-1-full {
+	flex: 1 100%;
+}
+.flex-2 {
+	flex: 2;
 }
