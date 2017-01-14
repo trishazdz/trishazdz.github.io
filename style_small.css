@@ -1,0 +1,48 @@
+@media screen and (max-width: 900px) {
+  body {
+    padding: 0 2rem;
+    min-width: 30rem;
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .flex {
+  	flex-direction: column;
+  }
+
+  nav.main {
+  	margin: 0 auto;
+  	text-align: center;
+
+  	list-style: none;
+  	-ms-box-orient: horizontal;
+  	display: -webkit-box;
+  	display: -moz-box;
+  	display: -ms-flexbox;
+  	display: -moz-flex;
+  	display: -webkit-flex;
+  	display: flex;
+  }
+
+  nav.main a{
+  	font-size: 1.6rem;
+  	flex: 1;
+  }
+
+  #name {
+  	text-align: center;
+  }
+
+  .img-container {
+  	text-align: center;
+  }
+  img.fit {
+  	max-width: 28rem;
+  }
+
+  #bio p {
+	line-height: 2.5rem;
+	font-size: 1.6rem;
+	color: #444;
+}
+}

@@ -27,6 +27,7 @@ br {
 }
 nav.main {
 	margin-bottom: 3rem;
+	margin-right: 1rem;
 }
 nav.main a {
 	font-size: 1.3rem;
@@ -49,7 +50,7 @@ nav.main a {
   display: flex;
 }
 
-.wrap {
+.flex.wrap {
   -webkit-flex-wrap: wrap;
   flex-wrap: wrap;
 }
@@ -113,3 +114,4 @@ h1, p {
 .flex-2 {
 	flex: 2;
 }
+
