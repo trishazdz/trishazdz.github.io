@@ -62,6 +62,7 @@ nav.main a {
 	justify-content: space-around;
 }
 
+
 ul {
 	list-style: none;
 	list-style-type: none;
@@ -115,3 +116,7 @@ h1, p {
 	flex: 2;
 }
 
+div.img-container {
+	width: 40%;
+	margin: 0 auto;
+}
